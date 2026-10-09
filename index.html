@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shipboard Electronic System – Rafael Sukirno, CE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#f6f2e8;--bg2:#ede6d3;--card:#fffdf7;--ink:#0c1a33;--mute:#55627a;--line:#e0d5b8;
+ --gold:#9c6f17;--gold2:#dcb45a;--navy:#0b1d3a;--acc:#1d5fd1;--ok:#178a5b;--bad:#c23a3a;--warn:#b97a0c;
+ --sh:0 12px 34px rgba(12,26,51,.12);
+ --hero:linear-gradient(140deg,#08152c 0%,#0f2b55 58%,#17427a 100%);
+ --serif:"Cormorant Garamond","Playfair Display",Georgia,serif;
+ --sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+ --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --bg:#060e1e;--bg2:#0a1830;--card:#0e1f3d;--ink:#eef1f8;--mute:#9dabc6;--line:#20375e;
+ --gold:#dcb45a;--gold2:#f0d48a;--acc:#6ea2ff;--ok:#3ccf91;--bad:#ff7a7a;--warn:#f3b545;--sh:0 12px 34px rgba(0,0,0,.45);}}
+:root[data-theme="dark"]{
+ --bg:#060e1e;--bg2:#0a1830;--card:#0e1f3d;--ink:#eef1f8;--mute:#9dabc6;--line:#20375e;
+ --gold:#dcb45a;--gold2:#f0d48a;--acc:#6ea2ff;--ok:#3ccf91;--bad:#ff7a7a;--warn:#f3b545;--sh:0 12px 34px rgba(0,0,0,.45);}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 84px);-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.65;font-size:16px}
+body.lock{overflow:hidden}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--serif);line-height:1.1}
+/* NAV */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1240px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--gold2),var(--gold));display:grid;place-items:center;font-size:21px;color:#0b1d3a;box-shadow:0 4px 14px rgba(156,111,23,.35)}
+.brand b{font-family:var(--serif);font-size:21px;display:block;line-height:1.05}
+.brand small{color:var(--mute);font-size:11.5px}
+.menu{display:flex;gap:2px;margin-left:auto;align-items:center}
+.mi{position:relative}
+.mi>button,.mi>a{background:none;border:0;padding:9px 12px;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none;display:inline-flex;gap:6px;align-items:center}
+.mi>button:hover,.mi.open>button,.mi>a:hover{background:var(--bg2)}
+.mi>button::after{content:"▾";font-size:10px;color:var(--gold)}
+.dd{display:none;position:absolute;right:0;top:calc(100% + 8px);min-width:330px;max-width:calc(100vw - 24px);background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);padding:8px;max-height:72vh;overflow:auto}
+.mi.open .dd{display:block}
+.dd.wide{min-width:590px}
+.mi.open .dd.wide{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.dd a,.dd button{display:flex;gap:9px;align-items:center;width:100%;text-align:left;background:none;border:0;padding:8px 10px;border-radius:9px;font-size:13.5px;text-decoration:none;line-height:1.35}
+.dd a:hover,.dd button:hover{background:var(--bg2)}
+.dd .h{grid-column:1/-1;font-size:12px;color:var(--gold);padding:8px 10px 3px;font-weight:700;font-family:var(--serif);font-size:16px}
+.dd small{color:var(--mute);display:block}
+.dd .ic{width:26px;text-align:center;flex-shrink:0}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:17px;flex-shrink:0}
+.iconbtn:hover{border-color:var(--gold)}
+.burger{display:none}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:12px;font-weight:600;font-size:14px;text-decoration:none;border:1px solid transparent;background:linear-gradient(135deg,var(--gold2),#c99a3c);color:#1a1305;cursor:pointer;transition:transform .15s,filter .15s}
+.btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn.ghost{background:transparent;border-color:var(--gold2);color:var(--gold)}
+.hero .btn.ghost{color:#f3dfa8}
+.gbtn{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:600;text-decoration:none;transition:border-color .15s,background .15s}
+.gbtn:hover{border-color:var(--gold);background:var(--bg2)}
+.gbtn.pri{background:linear-gradient(135deg,var(--gold2),#c99a3c);color:#1a1305;border-color:transparent}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none}
+.chip:hover,.chip.on{border-color:var(--gold);background:var(--bg2)}
+.chip.on{font-weight:700}
+/* HERO */
+.hero{background:var(--hero);color:#f4f1e8;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(620px 320px at 88% 8%,rgba(220,180,90,.30),transparent 60%),radial-gradient(520px 320px at 0% 100%,rgba(70,130,230,.33),transparent 60%)}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.3fr .7fr;gap:40px;padding-top:70px;padding-bottom:76px;align-items:center}
+.hero small.tag{display:inline-block;padding:6px 14px;border:1px solid rgba(240,212,138,.5);border-radius:999px;color:#f0d48a;font-size:13px;margin-bottom:20px}
+.hero h1{font-size:clamp(40px,6.2vw,72px);font-weight:700;letter-spacing:-.01em}
+.hero .sub{font-family:var(--serif);font-size:clamp(22px,3vw,32px);margin:12px 0 18px;background:linear-gradient(90deg,#f7e2a3,#dcb45a);-webkit-background-clip:text;background-clip:text;color:transparent;font-style:italic}
+.hero p.lead{color:#c9d3e6;max-width:56ch;font-size:17px}
+.hero .cta{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 20px}
+.hsearch{display:flex;gap:8px;max-width:520px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:6px}
+.hsearch input{flex:1;background:none;border:0;color:#fff;padding:9px 12px;font:inherit;min-width:0}
+.hsearch input::placeholder{color:#b8c4dc}
+.hsearch input:focus{outline:none}
+.glass{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:22px;padding:24px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.glass .by{font-family:var(--serif);font-size:24px;line-height:1.15;color:#fff}
+.glass .role{color:#b8c4dc;font-size:13.5px;margin-top:6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.stat{background:rgba(255,255,255,.07);border-radius:14px;padding:12px 8px;text-align:center}
+.stat b{font-family:var(--serif);font-size:32px;color:#f0d48a;display:block;line-height:1}
+.stat span{font-size:12px;color:#b8c4dc}
+.pulse{width:100%;height:60px;display:block}
+.pulse path{fill:none;stroke:#f0d48a;stroke-width:2.5;stroke-dasharray:8 6;animation:dash 1.4s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-28}}
+/* SECTIONS */
+.sec{padding:76px 0}
+.sec.alt{background:var(--bg2)}
+.eyebrow{color:var(--gold);font-weight:700;font-size:14px}
+.sec h2{font-size:clamp(32px,4.6vw,50px);margin:6px 0 12px;font-weight:700}
+.lead{color:var(--mute);max-width:68ch}
+.head{margin-bottom:30px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px}
+/* PYRAMID */
+.pyr{display:flex;flex-direction:column;align-items:center;gap:10px}
+.lv{border:0;border-radius:14px;padding:16px 18px;text-align:center;color:#fff;font-weight:600;width:var(--w);transition:transform .15s,box-shadow .15s;box-shadow:0 8px 22px rgba(12,26,51,.18)}
+.lv:hover{transform:translateY(-3px) scale(1.01);box-shadow:0 14px 30px rgba(12,26,51,.28)}
+.lv small{display:block;font-weight:400;opacity:.85;font-size:13px}
+.lv b{font-family:var(--serif);font-size:22px}
+.tech{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-top:14px}
+.tstep{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;position:relative}
+.tstep:hover{border-color:var(--gold);box-shadow:var(--sh)}
+.tstep b{font-family:var(--serif);font-size:22px;display:block}
+.tstep small{color:var(--mute);display:block;margin-top:4px}
+/* MODUL */
+.mcard{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:6px;transition:border-color .15s,transform .15s}
+.mcard:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--sh)}
+.mcard .mid{font-family:var(--mono);font-size:13px;color:var(--gold)}
+.mcard b{font-family:var(--serif);font-size:22px;line-height:1.15}
+.mcard span.b{font-size:13px;color:var(--mute)}
+.mcard.exam{background:linear-gradient(135deg,var(--navy),#17427a);color:#fff;border-color:transparent}
+.mcard.exam .mid,.mcard.exam span.b{color:#f0d48a}
+/* KATALOG */
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.tools input{flex:1;min-width:220px;padding:12px 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.kcard{background:var(--card);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.kcard:hover{border-color:var(--gold);box-shadow:var(--sh)}
+.kmain{background:none;border:0;text-align:left;padding:18px 18px 10px;display:flex;flex-direction:column;gap:6px;flex:1}
+.kmain .ki{font-size:30px}
+.kmain b{font-family:var(--serif);font-size:21px;line-height:1.15}
+.kmain .kc{font-size:12.5px;color:var(--gold);font-weight:600}
+.kmain p{font-size:14px;color:var(--mute);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.kfoot{display:flex;flex-wrap:wrap;gap:6px;padding:8px 14px 14px}
+.kfoot a{font-size:12.5px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);text-decoration:none;font-weight:600}
+.kfoot a:hover{border-color:var(--gold);background:var(--bg2)}
+.empty{padding:26px;text-align:center;color:var(--mute);border:1px dashed var(--line);border-radius:16px}
+/* SIM */
+.sim{background:linear-gradient(160deg,#0a1830,#10284d);color:#e9eefb;border-radius:24px;padding:26px;box-shadow:var(--sh)}
+.sim h3{color:#f0d48a;font-size:26px}
+.simgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px}
+.sim label{font-size:13.5px;color:#b8c4dc;display:block;margin:12px 0 4px}
+.sim input[type=range]{width:100%;accent-color:#dcb45a}
+.sim select,.sim input[type=number]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2a4570;background:#0b1a34;color:#fff;font:inherit}
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.ro{background:rgba(255,255,255,.07);border-radius:14px;padding:12px;text-align:center}
+.ro span{font-size:12px;color:#b8c4dc;display:block}
+.ro b{font-family:var(--mono);font-size:22px;color:#f0d48a}
+.ro.bad b{color:#ff8a8a}
+.ro.ok b{color:#5be0a3}
+.gauge{height:16px;border-radius:999px;background:linear-gradient(90deg,#c23a3a 0 16%,#3ccf91 16% 84%,#c23a3a 84% 100%);position:relative;margin:26px 0 6px}
+.gauge i{position:absolute;top:-6px;width:4px;height:28px;background:#fff;border-radius:2px;left:0;transition:left .25s}
+.gscale{display:flex;justify-content:space-between;font-size:11.5px;color:#9dabc6;font-family:var(--mono)}
+.diag{margin-top:14px;padding:14px;border-radius:14px;background:rgba(255,255,255,.07);font-size:14.5px}
+.diag.bad{border-left:4px solid #ff7a7a}
+.diag.ok{border-left:4px solid #3ccf91}
+.simsvg .sv text{fill:#e9eefb}
+.simsvg .sv .sm{fill:#9dabc6}
+.simsvg .sv .bx{fill:#0b1a34}
+.simsvg .sv .wl{stroke-dasharray:7 6;animation:dash var(--spd,1.2s) linear infinite}
+.simsvg.off .sv .wl{animation:none;stroke-dasharray:none;stroke:#667}
+/* CALC */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.tab{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:13.5px}
+.tab:hover{border-color:var(--gold)}
+.tab.on{background:linear-gradient(135deg,var(--gold2),#c99a3c);color:#1a1305;border-color:transparent}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:12px}
+.calc label{font-size:13px;color:var(--mute);display:block;margin-bottom:4px}
+.calc input,.calc select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+.out{margin-top:16px;padding:16px;border-radius:14px;background:var(--bg2);font-family:var(--mono);font-size:14px;line-height:1.8}
+/* WIZARD */
+.wz{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px}
+.wz .q{font-family:var(--serif);font-size:26px;margin:8px 0 14px;line-height:1.2}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-weight:500}
+.opt:hover{border-color:var(--gold);background:var(--bg2)}
+.trail{display:flex;flex-wrap:wrap;gap:6px;font-size:12.5px;color:var(--mute);margin-bottom:6px}
+.trail span{background:var(--bg2);border-radius:999px;padding:3px 10px}
+.res{border-left:5px solid var(--gold);padding:6px 0 6px 16px}
+.res ol{margin:10px 0 14px 20px}
+.res li{margin:4px 0}
+/* KAMUS */
+.term{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.term b{font-family:var(--serif);font-size:20px}
+.term p{font-size:14px;color:var(--mute);flex:1}
+.term div{display:flex;gap:6px;flex-wrap:wrap}
+.fcard b{font-family:var(--serif);font-size:20px;display:block}
+/* STUDI KASUS TIMELINE */
+.tl{position:relative;margin-top:28px;padding-left:0}
+.tl::before{content:"";position:absolute;left:27px;top:8px;bottom:8px;width:3px;background:linear-gradient(var(--gold2),var(--acc));border-radius:3px}
+.tlrow{position:relative;display:grid;grid-template-columns:56px 1fr;gap:16px;margin-bottom:18px}
+.tlnum{width:56px;height:56px;border-radius:50%;background:var(--card);border:3px solid var(--gold2);display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:22px;color:var(--gold);z-index:1;flex-shrink:0}
+.tlrow.lvl1 .tlnum{border-color:var(--acc);color:var(--acc)}
+.tlrow.lvl2 .tlnum{border-color:var(--ok);color:var(--ok)}
+.tlcard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.tlcard .lvltag{font-size:11.5px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.03em}
+.tlcard b{font-family:var(--serif);font-size:21px;display:block;margin:2px 0 6px}
+.tlcard p{font-size:14.5px;color:var(--mute)}
+.tlcard code{font-family:var(--mono);background:var(--bg2);padding:2px 6px;border-radius:6px;font-size:13px}
+@media (max-width:600px){.tl::before{left:23px}.tlnum{width:46px;height:46px;font-size:18px}.tlrow{grid-template-columns:46px 1fr;gap:10px}}
+.fbox{font-family:var(--mono);font-size:13.5px;background:var(--bg2);border-left:4px solid var(--gold);padding:12px 14px;border-radius:8px;margin:10px 0;line-height:1.8}
+.quiz .q{font-family:var(--serif);font-size:24px;margin:8px 0 12px}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,var(--card))}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 13%,var(--card))}
+/* MODAL */
+.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;padding-top:env(safe-area-inset-top,0px)}
+.modal[hidden]{display:none}
+.mback{position:absolute;inset:0;background:rgba(3,8,20,.68);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.sheet{position:relative;width:min(880px,100%);max-height:92%;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:24px 24px 0 0;box-shadow:0 -10px 60px rgba(0,0,0,.4);padding-bottom:env(safe-area-inset-bottom,0px);animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.mhead{display:flex;gap:12px;align-items:center;padding:16px 18px 10px}
+.mtw{flex:1;min-width:0}
+.badge{font-size:12.5px;color:var(--gold);font-weight:700}
+.mhead h3{font-size:clamp(24px,4vw,32px);font-weight:700}
+.mquick{display:flex;flex-wrap:wrap;gap:8px;padding:0 18px 10px}
+.mtabs{display:flex;gap:6px;padding:0 18px 10px;overflow-x:auto;scrollbar-width:none}
+.mtabs .tab{white-space:nowrap;padding:8px 13px}
+.mbody{overflow:auto;padding:6px 20px 28px;border-top:1px solid var(--line)}
+.mbody h4{font-family:var(--serif);font-size:21px;margin:18px 0 6px}
+.mbody p{margin:6px 0;color:var(--ink)}
+.mbody ul,.mbody ol{margin:6px 0 6px 22px}
+.mbody li{margin:5px 0}
+.note{background:var(--bg2);border-left:4px solid var(--gold);padding:12px 14px;border-radius:10px;margin:12px 0;font-size:14.5px}
+.warn{border-left-color:var(--warn)}
+.chips2{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.tbl{width:100%;border-collapse:collapse;margin:8px 0;font-size:14.5px}
+.tbl th,.tbl td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+.tbl th{color:var(--gold);font-weight:700;width:38%}
+.tbl a{text-decoration:none;margin-left:6px}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0}
+.fb{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13.5px;font-weight:600}
+.fa{color:var(--gold)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px;margin:10px 0}
+.tile{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);text-decoration:none;font-weight:600;font-size:14px}
+.tile:hover{border-color:var(--gold);background:var(--bg2)}
+.tile small{display:block;font-weight:400;color:var(--mute);font-size:12.5px}
+.brandchip{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;background:var(--bg)}
+.brandchip a{padding:6px 12px;text-decoration:none;font-size:13.5px;font-weight:600}
+.brandchip a+a{border-left:1px solid var(--line);padding:6px 10px}
+.brandchip:hover{border-color:var(--gold)}
+/* SVG */
+.sv{width:100%;height:auto;max-width:720px;display:block;margin:10px auto}
+.sv .bx{fill:var(--bg);stroke:var(--gold);stroke-width:2;rx:10}
+.sv .wl{fill:none;stroke:var(--acc);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.sv .wr{stroke:#d64545}.sv .wbk{stroke:var(--ink)}.sv .wbl{stroke:#2f74e8}.sv .wbr{stroke:#946030}.sv .ww{stroke:#a8b0c0}
+.sv .sh{fill:none;stroke:var(--mute);stroke-width:2;stroke-dasharray:5 4}
+.sv .tm{fill:var(--gold)}
+.sv .rs{fill:none;stroke:var(--gold);stroke-width:2.5}
+.sv text{fill:var(--ink);font:600 12px Inter,sans-serif}
+.sv .sm{font-weight:500;font-size:11px;fill:var(--mute)}
+/* FOOTER */
+footer{background:var(--hero);color:#c9d3e6;padding:48px 0 34px}
+footer .wrap{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:30px}
+footer h4{font-family:var(--serif);color:#f0d48a;font-size:22px;margin-bottom:8px}
+footer a{display:block;color:#c9d3e6;text-decoration:none;padding:3px 0;font-size:14px}
+footer a:hover{color:#f0d48a}
+footer .copy{grid-column:1/-1;border-top:1px solid rgba(255,255,255,.15);padding-top:18px;font-size:13px}
+@media (max-width:980px){
+ .burger{display:grid;margin-left:auto}
+ .menu{position:absolute;left:0;right:0;top:100%;background:var(--card);border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;padding:8px 12px 14px;display:none;max-height:76vh;overflow:auto;margin-left:0;box-shadow:var(--sh)}
+ .menu.open{display:flex}
+ .dd,.dd.wide{position:static;box-shadow:none;border:0;min-width:0;padding:0 0 6px 8px;max-height:none;max-width:none}
+ .mi.open .dd.wide{display:block}
+ .mi>button,.mi>a{width:100%;justify-content:space-between}
+ .hero .wrap{grid-template-columns:1fr;padding-top:44px;padding-bottom:50px}
+ .simgrid{grid-template-columns:1fr}
+ footer .wrap{grid-template-columns:1fr}
+}
+@media (min-width:721px){.modal{align-items:center}.sheet{border-radius:24px;max-height:88%}}
+@media (max-width:520px){.sec{padding:54px 0}.sim{padding:18px}.brand small{display:none}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body id="top">
+
+<header class="nav">
+ <div class="nav-in">
+  <a class="brand" href="#top"><span class="logo">⚓</span><span><b>ESS Academy</b><small>Rafael Sukirno, CE</small></span></a>
+  <button class="iconbtn burger" id="burger" aria-label="Buka menu" aria-expanded="false">☰</button>
+  <nav class="menu" id="menu" aria-label="Navigasi utama"></nav>
+  <button class="iconbtn" id="theme" aria-label="Ganti tema terang/gelap" title="Ganti tema">◐</button>
+ </div>
+</header>
+
+<main>
+<section class="hero">
+ <div class="wrap">
+  <div>
+   <small class="tag">Politeknik Pelayaran Surabaya dan Universitas Hang Tuah Surabaya</small>
+   <h1>Shipboard Electronic System</h1>
+   <div class="sub">Saraf dan otak kapal modern</div>
+   <p class="lead">Belajar elektronika dan otomasi kapal dari sensor sampai kapal otonom: 16 modul, katalog komponen lengkap dengan cara kerja, wiring, tipe, merk, besaran, dan troubleshooting. Setiap komponen punya tautan Google untuk foto dan diagram.</p>
+   <div class="cta">
+    <a class="btn" href="#katalog">Jelajahi komponen</a>
+    <a class="btn ghost" href="#simulator">Coba simulator 4–20 mA</a>
+    <a class="btn ghost" id="heroG" href="#" target="_blank" rel="noopener noreferrer">Cari di Google</a>
+   </div>
+   <form class="hsearch" id="hform" role="search">
+    <input id="hq" type="search" placeholder="Cari komponen, misalnya PT100, radar, EPIRB" aria-label="Cari komponen">
+    <button class="btn" type="submit">Cari</button>
+   </form>
+  </div>
+  <aside class="glass">
+   <div class="by">Rafael Sukirno, CE</div>
+   <div class="role">Penyusun materi. Dosen Marine Engineering, Poltekpel Surabaya dan UHT Surabaya. Pelaut aktif 1991–2021.</div>
+   <div class="stats">
+    <div class="stat"><b id="sMod">16</b><span>modul</span></div>
+    <div class="stat"><b id="sKom">40</b><span>komponen</span></div>
+    <div class="stat"><b>4</b><span>level otomasi</span></div>
+   </div>
+   <svg class="pulse" viewBox="0 0 300 60" aria-hidden="true"><path d="M0 40 H60 L75 12 L95 52 L115 28 H180 L195 8 L215 48 L235 30 H300"/></svg>
+   <div class="role">Semua tombol di aplikasi ini bisa diklik. Foto, wiring diagram, datasheet, dan video terbuka di Google pada tab baru.</div>
+  </aside>
+ </div>
+</section>
+
+<section class="sec" id="piramida">
+ <div class="wrap">
+  <div class="head">
+   <div class="eyebrow">Peta besar</div>
+   <h2>Piramida otomasi kapal</h2>
+   <p class="lead">Tekan tiap level untuk melihat isinya, komponen yang terlibat, dan tautan Google. Belajar dari bawah ke atas: sinyal lahir di lapangan, diolah PLC, ditampilkan di IAS, lalu dikirim ke darat.</p>
+  </div>
+  <div class="pyr" id="pyr"></div>
+  <div class="head" style="margin-top:46px">
+   <h2 style="font-size:clamp(28px,4vw,40px)">Dari automasi sampai kapal otonom</h2>
+   <p class="lead">Empat istilah yang sering tertukar. Tekan kartunya untuk perbandingan cara kerja dan komponen.</p>
+  </div>
+  <div class="tech" id="tech"></div>
+ </div>
+</section>
+
+<section class="sec alt" id="kurikulum">
+ <div class="wrap">
+  <div class="head">
+   <div class="eyebrow">Kurikulum</div>
+   <h2>16 modul pembelajaran</h2>
+   <p class="lead">Alur belajar: kenali, temukan, telusuri, ukur, pahami, operasikan, pantau, atasi gangguan, laporkan. Setiap modul membuka ringkasan materi, topik, komponen terkait, dan tautan Google.</p>
+  </div>
+  <div class="grid g3" id="modGrid"></div>
+ </div>
+</section>
+
+<section class="sec" id="katalog">
+ <div class="wrap">
+  <div class="head">
+   <div class="eyebrow">Katalog komponen</div>
+   <h2>Foto, wiring, cara kerja, dan merk</h2>
+   <p class="lead">Tekan nama komponen untuk membuka detail: fungsi, cara kerja, wiring diagram, tipe dan merk, besaran, troubleshooting, serta tautan foto di Google Images.</p>
+  </div>
+  <div class="tools">
+   <input id="kq" type="search" placeholder="Filter katalog: ketik nama, fungsi, atau merk" aria-label="Filter katalog">
+   <a class="btn ghost" id="kG" href="#" target="_blank" rel="noopener noreferrer">Cari foto di Google</a>
+  </div>
+  <div class="chips" id="kchips"></div>
+  <div class="grid g3" id="kgrid"></div>
+  <p class="lead" id="kcount" style="margin-top:14px"></p>
+ </div>
+</section>
+
+<section class="sec alt" id="simulator">
+ <div class="wrap">
+  <div class="head">
+   <div class="eyebrow">Simulator interaktif</div>
+   <h2>Loop 4–20 mA dan gangguannya</h2>
+   <p class="lead">Geser tekanan, lalu suntikkan gangguan seperti kabel putus, suplai mati, atau sensor drift. Lihat apa yang terbaca di multimeter dan di layar IAS.</p>
+  </div>
+  <div class="sim">
+   <h3>Transmitter tekanan LO mesin utama</h3>
+   <div class="simgrid">
+    <div>
+     <label for="sRange">Rentang transmitter</label>
+     <select id="sRange"><option value="10">0–10 bar (contoh: LO pressure)</option><option value="16">0–16 bar</option><option value="100">0–100 bar</option><option value="250">0–250 bar</option></select>
+     <label for="sP">Tekanan proses: <b id="sPv">5.0</b></label>
+     <input id="sP" type="range" min="0" max="100" step="1" value="50">
+     <label for="sFault">Kondisi loop</label>
+     <select id="sFault">
+      <option value="ok">Normal</option>
+      <option value="open_p">Kabel putus sisi (+), sebelum transmitter</option>
+      <option value="open_r">Kabel putus sisi return</option>
+      <option value="psu">Suplai 24 V mati / fuse putus</option>
+      <option value="short">Korsleting pada loop</option>
+      <option value="low">Transmitter rusak (fail-low 3,6 mA)</option>
+      <option value="high">Transmitter rusak (fail-high 21 mA)</option>
+      <option value="drift">Drift kalibrasi +8 %</option>
+      <option value="noise">Ground loop / noise</option>
+     </select>
+     <div class="readouts">
+      <div class="ro"><span>Arus loop</span><b id="rI">12.00 mA</b></div>
+      <div class="ro"><span>Tegangan di transmitter</span><b id="rV">20.8 V</b></div>
+      <div class="ro"><span>Tegangan shunt 250 Ω</span><b id="rS">3.00 V</b></div>
+      <div class="ro" id="roI"><span>Tampil di IAS</span><b id="rD">5.0 bar</b></div>
+     </div>
+     <div class="gauge" aria-hidden="true"><i id="gI"></i></div>
+     <div class="gscale"><span>0</span><span>4</span><span>12</span><span>20</span><span>24 mA</span></div>
+    </div>
+    <div>
+     <div class="simsvg" id="simsvg"></div>
+     <div class="diag" id="diag"></div>
+     <div class="chips2" style="margin-top:12px" id="simLinks"></div>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section class="sec" id="studikasus">
+ <div class="wrap">
+  <div class="head">
+   <div class="eyebrow">Studi kasus</div>
+   <h2>Alarm "LO PRESS LOW" — dari sensor sampai layar</h2>
+   <p class="lead">Satu alarm nyata ditelusuri langkah demi langkah lewat seluruh lapisan piramida otomasi. Pahami satu alur ini sampai lengket, dan pola yang sama berlaku untuk hampir semua alarm di kapal.</p>
+  </div>
+  <div class="tlwrap"><div class="tl" id="tlBody"></div></div>
+  <div class="chips2" style="margin-top:8px" id="tlLinks"></div>
+ </div>
+</section>
+
+<section class="sec" id="kalkulator">
+ <div class="wrap">
+  <div class="head">
+   <div class="eyebrow">Kalkulator</div>
+   <h2>Hitung seperti di kapal</h2>
+   <p class="lead">Tiga kalkulator yang paling sering dipakai saat tracing dan pengukuran: PT100, resolusi ADC, dan cek suplai loop.</p>
+  </div>
+  <div class="tabs" id="ctabs"></div>
+  <div class="card" id="cbody"></div>
+ </div>
+</section>
+
+<section class="sec alt" id="trouble">
+ <div class="wrap">
+  <div class="head">
+   <div class="eyebrow">Troubleshooting</div>
+   <h2>Wizard cari gangguan</h2>
+   <p class="lead">Jangan menebak. Pilih gejala, jawab hasil pengukuran, dan wizard menuntun ke penyebab. Di akhir ada tautan Google untuk panduan dan video.</p>
+  </div>
+  <div class="tabs" id="wtabs"></div>
+  <div class="wz" id="wz"></div>
+ </div>
+</section>
+
+<section class="sec" id="kamus">
+ <div class="wrap">
+  <div class="head">
+   <div class="eyebrow">Kamus istilah</div>
+   <h2>Glosarium elektronika kapal</h2>
+   <p class="lead">Tiap istilah punya dua tombol: penjelasan di Google dan gambarnya di Google Images.</p>
+  </div>
+  <div class="tools"><input id="tq" type="search" placeholder="Cari istilah, misalnya ADC atau ground loop" aria-label="Cari istilah"></div>
+  <div class="grid g3" id="tgrid"></div>
+ </div>
+</section>
+
+<section class="sec alt" id="rumus">
+ <div class="wrap">
+  <div class="head">
+   <div class="eyebrow">Kamus rumus</div>
+   <h2>Rumus inti ESS</h2>
+  </div>
+  <div class="grid g2" id="fgrid"></div>
+ </div>
+</section>
+
+<section class="sec" id="kuis">
+ <div class="wrap">
+  <div class="head">
+   <div class="eyebrow">Latihan</div>
+   <h2>Kuis kilat</h2>
+   <p class="lead">Delapan soal untuk menguji pemahaman. Jawaban langsung dijelaskan.</p>
+  </div>
+  <div class="card quiz" id="quiz"></div>
+ </div>
+</section>
+</main>
+
+<footer>
+ <div class="wrap">
+  <div>
+   <h4>Shipboard Electronic System</h4>
+   <p>Materi pembelajaran untuk Taruna Teknika dan ETO, Politeknik Pelayaran Surabaya dan Universitas Hang Tuah Surabaya.</p>
+   <p style="margin-top:10px"><b style="color:#fff">Disusun oleh Rafael Sukirno, CE</b><br>Dosen Marine Engineering. Big Picture Engineering: sistem dulu, hafalan belakangan.</p>
+  </div>
+  <div>
+   <h4>Jelajah</h4>
+   <a href="#piramida">Piramida otomasi</a><a href="#kurikulum">16 modul</a><a href="#katalog">Katalog komponen</a><a href="#simulator">Simulator 4–20 mA</a><a href="#trouble">Wizard troubleshooting</a>
+  </div>
+  <div id="fLinks">
+   <h4>Cari di Google</h4>
+  </div>
+  <div class="copy">© 2026 Rafael Sukirno, CE. Materi ini untuk kegiatan belajar. Selalu ikuti manual pabrik dan prosedur keselamatan kapal saat bekerja pada peralatan sungguhan.</div>
+ </div>
+</footer>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mtitle">
+ <div class="mback" data-close></div>
+ <div class="sheet">
+  <div class="mhead">
+   <button class="iconbtn" id="mbackbtn" hidden aria-label="Kembali">←</button>
+   <div class="mtw"><div class="badge" id="mbadge"></div><h3 id="mtitle"></h3></div>
+   <button class="iconbtn" data-close aria-label="Tutup">✕</button>
+  </div>
+  <div class="mquick" id="mquick"></div>
+  <div class="mtabs" id="mtabs"></div>
+  <div class="mbody" id="mbody"></div>
+ </div>
+</div>
+
+<script>
+"use strict";
+const CAT={sensor:["Sensor & Transmitter","📡"],kontrol:["Kontrol & Aktuator","🧠"],jaringan:["Jaringan Data","🔗"],navigasi:["Navigasi Anjungan","🧭"],komunikasi:["Komunikasi & GMDSS","📻"],safety:["Keselamatan & Deteksi","🚨"]};
+
+const KOMP=[
+/* ============ SENSOR & TRANSMITTER ============ */
+{id:"pt100",c:"sensor",i:"🌡️",n:"PT100 (RTD platina)",en:"PT100 RTD temperature sensor marine",tr:"pt100",w:"rtd3",
+ f:"Mengukur suhu air pendingin, minyak pelumas, bahan bakar, bearing, dan udara bilas. Datanya menjadi alarm, slowdown, dan tampilan suhu di IAS.",
+ lok:"Thermowell pada pipa air tawar/laut, inlet dan outlet LO mesin utama, bearing generator, jaket pendingin.",
+ k:"Resistansi platina naik hampir linear terhadap suhu: 100 Ω pada 0 °C dan 138,5 Ω pada 100 °C. Modul RTD mengalirkan arus eksitasi kecil (≤ 1 mA), mengukur tegangan jatuhnya, lalu menghitung suhu. Sambungan 3-kawat memungkinkan modul mengurangi pengaruh tahanan kabel.",
+ tp:["2-kawat","3-kawat (paling umum di kapal)","4-kawat (presisi)","PT1000","Kelas A / Kelas B (IEC 60751)","Transmitter kepala 4–20 mA"],
+ mk:["Endress+Hauser","WIKA","JUMO","Danfoss","Rosemount (Emerson)"],
+ bs:[["Resistansi 0 °C","100 Ω"],["Resistansi 100 °C","138,51 Ω"],["Koefisien α","0,00385 Ω/Ω/°C"],["Rentang tipikal","−50…+500 °C (maks. −200…+850 °C)"],["Arus eksitasi","≤ 1 mA"],["Toleransi Kelas A","±(0,15 + 0,002·|t|) °C"]],
+ al:["Thermowell + PT100","Kabel 3-kawat berselubung","Modul RTD / AI PLC","CPU PLC","Layar IAS"],
+ ts:["Lepas kabel dari terminal modul, ukur resistansi antar kawat dengan multimeter presisi.","Bandingkan dengan tabel: 0 °C = 100 Ω, 25 °C ≈ 109,7 Ω.","Terbaca 0 Ω berarti korsleting, tak terhingga (OL) berarti elemen atau kabel putus. Ganti sensor atau kabel.","Pada 3-kawat, dua kawat berwarna sama harus punya resistansi hampir sama.","Periksa kelembapan di kepala sensor, terminal kendor atau korosi, dan pastikan shield hanya di-ground satu titik."]},
+
+{id:"tck",c:"sensor",i:"🔥",n:"Thermocouple tipe K",en:"thermocouple type K exhaust gas temperature sensor",
+ f:"Mengukur suhu tinggi seperti gas buang tiap silinder (300–600 °C), inlet turbocharger, dan boiler.",
+ lok:"Exhaust gas outlet tiap silinder mesin utama, turbocharger, cerobong boiler.",
+ k:"Dua logam berbeda (Chromel dan Alumel) disambung di ujung ukur dan menghasilkan tegangan kecil akibat efek Seebeck, sekitar 41 µV per °C. Modul TC menambahkan kompensasi cold junction dan mengubah mV menjadi suhu. Kabel harus kabel ekstensi tipe K dengan polaritas benar.",
+ tp:["Tipe K (Chromel–Alumel)","Tipe J","Tipe T","Tipe N","Junction grounded / ungrounded","Mineral insulated (MI)"],
+ mk:["Omega","WIKA","JUMO","Endress+Hauser"],
+ bs:[["Rentang tipe K","−200…+1.260 °C"],["Sensitivitas","± 41 µV/°C"],["Sinyal","0…±50 mV"],["Waktu respon","0,1–5 detik (tergantung diameter)"],["Kabel","Ekstensi tipe K, polaritas harus benar"]],
+ al:["Thermocouple K","Kabel kompensasi","Modul TC (cold junction)","PLC","IAS"],
+ ts:["Ukur tegangan mV di ujung kabel dan bandingkan dengan tabel tipe K.","Polaritas terbalik membuat suhu terbaca turun ketika suhu naik. Periksa warna kabel.","Terbaca burnout atau over-range berarti thermocouple putus.","Pastikan kabel ekstensi sesuai tipe dan tidak ada sambungan tembaga biasa.","Noise pada junction grounded: gunakan tipe ungrounded dan shield di-ground satu titik."]},
+
+{id:"ptx",c:"sensor",i:"🧭",n:"Pressure transmitter 4–20 mA",en:"pressure transmitter 4-20mA marine Danfoss MBS 3000",tr:"loop",w:"loop2",
+ f:"Mengubah tekanan (LO, bahan bakar, air pendingin, udara start, hidrolik) menjadi sinyal 4–20 mA ke PLC dan IAS. Alarm low LO pressure menjadi dasar slowdown atau shutdown mesin.",
+ lok:"Manifold LO mesin utama, discharge pompa, header udara start, sistem hidrolik steering gear.",
+ k:"Tekanan menekan diafragma piezoresistif atau keramik. Perubahan resistansi atau kapasitansi dikuatkan elektronik internal menjadi arus 4 mA (tekanan minimum) sampai 20 mA (maksimum). Transmitter 2-kawat memakai loop yang sama untuk daya dan sinyal. Arus yang tetap di seluruh loop membuat pembacaan tidak terpengaruh panjang kabel, selama tegangan suplai masih cukup.",
+ tp:["Piezoresistif (silikon)","Kapasitif keramik","Strain gauge film tipis","Gauge / absolut / sealed gauge","Output 4–20 mA, 1–5 V, 0–10 V, HART","2-kawat (loop powered) dan 3-kawat"],
+ mk:["Danfoss (MBS 3000)","Endress+Hauser (Cerabar)","Rosemount 3051 (Emerson)","WIKA (S-20)","Siemens SITRANS P","Yokogawa"],
+ bs:[["Rentang contoh","0–10 bar"],["Output","4–20 mA (4 mA = 0 bar, 20 mA = 10 bar)"],["Tegangan suplai","10–30 V DC"],["Akurasi","≤ ±0,5 % FS (tergantung seri)"],["Shunt PLC","250 Ω, menghasilkan 1–5 V DC"],["Proteksi","IP65–IP67, tahan getaran"]],
+ al:["Diafragma sensor","Elektronik transmitter","Loop 4–20 mA berselubung","Modul AI + shunt 250 Ω","ADC, CPU PLC","IAS dan alarm"],
+ ts:["Ukur tegangan di terminal transmitter: 0 V berarti suplai atau kabel sisi (+) bermasalah; sekitar 18–24 V berarti suplai normal.","Seri-kan multimeter mode mA: 0 mA berarti loop terbuka; di bawah 3,8 atau di atas 20,5 mA berarti transmitter atau sensor rusak.","Bandingkan dengan manometer lokal. Jika beda, kalibrasi zero dan span dengan pressure calibrator.","Jika mA benar tetapi IAS salah, periksa skala engineering unit di PLC dan modul AI.","Angka bergoyang: periksa ground loop (shield di-ground dua ujung) dan kabel yang berdekatan dengan kabel tenaga atau VFD."]},
+
+{id:"dpt",c:"sensor",i:"💧",n:"DP transmitter (level & aliran)",en:"differential pressure transmitter boiler drum level",tr:"loop",w:"loop2",
+ f:"Mengukur level (drum boiler, tangki) atau aliran dari beda tekanan. Sangat penting untuk menjaga level air drum boiler.",
+ lok:"Drum boiler, tangki harian, filter diferensial FO/LO, strainer.",
+ k:"Dua sisi diafragma menerima tekanan tinggi (HP) dan rendah (LP). Selisih ΔP = ρ·g·h diubah menjadi 4–20 mA sehingga level dapat dihitung. Untuk boiler, densitas air pada suhu kerja harus diperhitungkan.",
+ tp:["Kapasitif","Piezoresistif","Dengan manifold 3-valve / 5-valve","Remote seal","4–20 mA + HART"],
+ mk:["Rosemount 3051 (Emerson)","Yokogawa EJA","Endress+Hauser Deltabar","Siemens SITRANS P DS III","ABB 266"],
+ bs:[["Rentang","0–250 mbar hingga beberapa bar"],["Output","4–20 mA (± HART)"],["Akurasi","±0,065–0,1 % span"],["Suplai","10,5–42 V DC"],["Rumus level","h = ΔP / (ρ·g)"]],
+ al:["Tap HP dan LP","Manifold 3-valve","DP transmitter","Loop 4–20 mA","PLC / burner control","Alarm level boiler"],
+ ts:["Periksa manifold: valve equalizing tertutup, valve isolasi terbuka.","Cek impulse line tersumbat atau berisi udara. Lakukan blow-down sesuai prosedur.","Lakukan zero trim dengan equalizing valve terbuka.","Ukur loop 4–20 mA seperti transmitter tekanan biasa.","Jika level tidak masuk akal, periksa densitas air pada suhu kerja dan rentang yang terkonfigurasi."]},
+
+{id:"wtr",c:"sensor",i:"🛢️",n:"Water transducer (purifier)",en:"purifier water in oil transducer capacitive Alfa Laval EPC",tr:"loop",w:"loop2",
+ f:"Mendeteksi kadar air pada minyak bersih keluaran purifier. Hasilnya memicu pembuangan air atau desludging otomatis.",
+ lok:"Outlet minyak bersih purifier HFO dan LO.",
+ k:"Sensor kapasitif membaca konstanta dielektrik cairan. Minyak sekitar 2–3, air sekitar 80. Ketika air bertambah, kapasitansi naik dan sinyal keluaran naik. Controller (misalnya EPC) membandingkan dengan setpoint lalu membuka katup drain.",
+ tp:["Kapasitif inline","Output 4–20 mA atau 0–10 V","Dikalibrasi per jenis minyak (HFO/MDO/LO)"],
+ mk:["Alfa Laval (EPC)","GEA Westfalia","Mitsubishi Kakoki"],
+ bs:[["Dielektrik minyak","≈ 2–3"],["Dielektrik air","≈ 80"],["Output","4–20 mA (umumnya)"],["Suplai","24 V DC"],["Aksi","Buka katup drain / desludging"]],
+ al:["Probe kapasitif","Sinyal analog","Controller EPC / PLC","Katup solenoid drain","Log dan alarm IAS"],
+ ts:["Bersihkan probe dari endapan dan sludge.","Cek suplai 24 V DC dan kabel sinyal.","Lakukan kalibrasi atau setpoint air sesuai manual controller.","Ganti jenis minyak berarti perlu kalibrasi ulang.","Periksa aliran air seal dan kondisi solenoid drain."]},
+
+{id:"prox",c:"sensor",i:"🎯",n:"Inductive proximity sensor",en:"inductive proximity sensor PNP NPN 3 wire",w:"prox3",tr:"plc",
+ f:"Mendeteksi logam tanpa kontak untuk posisi katup, penghitung putaran (RPM), dan limit switch elektronik.",
+ lok:"Valve position feedback, flywheel, turning gear, pompa dan motor.",
+ k:"Kumparan menghasilkan medan osilasi. Ketika logam mendekat, arus eddy meredam osilasi dan rangkaian mengubah output menjadi ON. Frekuensi pulsa dapat dihitung PLC sebagai RPM.",
+ tp:["PNP (sourcing) / NPN (sinking)","NO / NC","3-kawat dan 2-kawat","Shielded / unshielded","Ukuran M12, M18, M30"],
+ mk:["Pepperl+Fuchs","Turck","Omron","Balluff","Autonics"],
+ bs:[["Suplai","10–30 V DC"],["Jarak sensing","2–15 mm (tergantung ukuran)"],["Frekuensi switching","0,1–5 kHz"],["Arus output","≤ 200 mA"],["Proteksi","IP67"]],
+ al:["Target logam","Sensor proximity","Kabel 3-kawat","Input digital PLC (DI)","Logika PLC / counter RPM"],
+ ts:["Amati LED indikator sensor saat target didekatkan.","Ukur jarak terhadap target. Terlalu jauh membuat sensor tidak aktif.","Ukur suplai 24 V DC pada kawat coklat dan biru.","Pastikan tipe PNP atau NPN cocok dengan modul DI PLC.","Cek kabel dan konektor M12 yang longgar atau korosi."]},
+
+{id:"enc",c:"sensor",i:"⚙️",n:"Rotary / angle encoder",en:"optical rotary encoder crankshaft angle encoder marine engine",
+ f:"Mengukur posisi sudut dan RPM poros engkol atau poros baling-baling, lalu mengirimnya ke ECU dan sistem tacho.",
+ lok:"Crankshaft mesin utama elektronik, poros propeller, turning gear.",
+ k:"Cakram bergaris dan sumber cahaya menghasilkan pulsa A dan B yang bergeser 90° serta pulsa Z sebagai referensi satu kali per putaran. Menghitung pulsa memberi sudut, beda fase A-B memberi arah putaran.",
+ tp:["Incremental (A, B, Z)","Absolut (single/multi-turn)","Optik / magnetik","Output TTL, HTL, SinCos","Poros solid / hollow"],
+ mk:["Heidenhain","Hengstler","Sick","Baumer","Pepperl+Fuchs"],
+ bs:[["Resolusi tipikal","360–10.000+ pulsa/putaran"],["Ketelitian sudut mesin ME","≈ 0,1°"],["Output","Pulsa A/B/Z (TTL 5 V atau HTL 24 V)"],["Suplai","5 V atau 10–30 V DC"],["Frekuensi maks.","100–300 kHz"]],
+ al:["Cakram di poros","Sinyal A-B-Z","Signal conditioner","ECU / CCU","RPM dan sudut di IAS"],
+ ts:["Periksa LED dan suplai 5 atau 24 V.","Dengan osiloskop: pulsa A dan B harus bergeser 90°.","Cek kopling encoder (slip atau patah) dan kekencangan mounting.","Shield di-ground satu titik dan jauhkan dari kabel tenaga.","Jika alarm encoder fault, periksa sinyal Z (referensi) dan konektor."]},
+
+/* ============ KONTROL & AKTUATOR ============ */
+{id:"plc",c:"kontrol",i:"🧠",n:"PLC (Programmable Logic Controller)",en:"PLC programmable logic controller marine automation Siemens",tr:"plc",
+ f:"Otak automasi kamar mesin: membaca sensor, menjalankan logika Ladder atau FBD, memerintah aktuator, dan mengirim data ke IAS.",
+ lok:"Panel PLC di ECR, panel mesin, dan panel dekat permesinan (bersama remote I/O).",
+ cat:"PLC adalah tulang punggung automasi dan alarm. Namun fungsi pengaman kritis seperti shutdown mesin, deteksi kebakaran, dan oil mist detector harus punya jalur pengaman yang independen dari kontrol utama.",
+ k:"PLC bekerja dalam siklus scan berulang: baca input, jalankan program, tulis output, komunikasi, diagnosa. Satu siklus memakan hitungan milidetik. Mengubah urutan kerja cukup dengan mengedit program, tanpa mengubah kabel.",
+ tp:["Kompak dan modular","Redundan (dual CPU)","Safety PLC (SIL)","Bahasa Ladder / FBD / Structured Text","Type approval kelas (DNV, ABS, BV, LR, KR)"],
+ mk:["Siemens (S7-300/1500)","ABB (AC500)","Schneider (Modicon)","Kongsberg","Omron"],
+ bs:[["Suplai","24 V DC"],["Waktu scan","1–20 ms (tergantung program)"],["Input digital","24 V DC (sink/source)"],["Input analog","4–20 mA / 0–10 V, 12–16 bit"],["Suhu kerja","0–55 °C (marine grade)"],["Sertifikasi","Type approval badan klasifikasi"]],
+ al:["Sensor dan saklar","Modul DI / AI","CPU dan program","Modul DO / AO","Solenoid, valve, motor","Data ke IAS"],
+ ts:["Baca status LED: POWER, RUN, SF (system fault), BF (bus fault), dan LED kanal I/O.","POWER mati: ukur suplai 24 V dan periksa fuse atau MCB.","SF merah: hubungkan laptop dan baca diagnostic buffer.","RUN normal tetapi IO fail: ukur sinyal lapangan dan cek kabel serta sensor.","Simpan backup program sebelum melakukan perubahan atau reset."]},
+
+{id:"rio",c:"kontrol",i:"🧩",n:"Remote I/O",en:"remote IO module Profinet ET200 marine",tr:"plc",
+ f:"Modul input/output terdistribusi di dekat permesinan. Mengurangi kabel point-to-point menuju ECR.",
+ lok:"Panel lokal di kamar mesin, dekat purifier, pompa, dan mesin bantu.",
+ k:"Sensor dan aktuator dihubungkan ke modul lokal. Modul mengirim dan menerima data digital lewat bus (Profibus, Profinet, Modbus, EtherCAT) ke CPU utama sehingga hanya satu kabel bus yang ditarik.",
+ tp:["Modul DI / DO / AI / AO","Modul RTD dan TC","Modul IP20 (di panel) dan IP65 (lapangan)","Hot-swap"],
+ mk:["Siemens ET 200","Phoenix Contact Axioline","WAGO 750","Beckhoff EtherCAT"],
+ bs:[["Kanal","8–32 per modul"],["Bus","Profibus DP / Profinet / Modbus"],["Suplai","24 V DC"],["Kecepatan","12 Mbps / 100 Mbps"],["Proteksi","IP20 / IP65–67"]],
+ al:["Sensor lapangan","Modul remote I/O","Kabel bus","CPU utama PLC","Program dan IAS"],
+ ts:["Lihat LED kelompok: power, bus, dan error tiap kanal.","Cek alamat atau nama perangkat dan kecepatan bus.","Ukur suplai 24 V ke modul dan kartu terminal.","Uji dengan menukar modul dengan cadangan yang sama.","Periksa kabel bus dan konektor."]},
+
+{id:"aim",c:"kontrol",i:"🔢",n:"Modul analog input dan ADC",en:"PLC analog input module ADC 4-20mA 16 bit",tr:"plc",
+ f:"Mengubah sinyal analog (4–20 mA, 0–10 V, RTD, TC) menjadi angka digital yang dapat dibaca CPU.",
+ lok:"Slot modul PLC atau remote I/O.",
+ k:"Arus 4–20 mA melewati resistor shunt 250 Ω dan menghasilkan 1–5 V. Tegangan dikonversi oleh ADC 12 atau 16 bit menjadi angka bulat (misalnya 0–27.648 pada Siemens), lalu program menskalakannya menjadi bar, °C, atau meter.",
+ tp:["4–20 mA / 0–10 V / RTD / TC","12-bit atau 16-bit","Terisolasi kanal ke bus","Dengan deteksi wire break"],
+ mk:["Siemens SM 1231 / SM 331","Beckhoff KL3xxx","WAGO 750-45x","Phoenix Contact"],
+ bs:[["Shunt input","250 Ω"],["Tegangan hasil","1–5 V DC"],["Resolusi 12-bit","4.096 langkah"],["Resolusi 16-bit","65.536 langkah"],["Contoh presisi","0–100 bar / 65.536 = 0,0015 bar"]],
+ al:["4–20 mA","Shunt 250 Ω","Filter dan isolasi","ADC 12/16-bit","Register PLC","Skala satuan teknik"],
+ ts:["Ukur mA di loop dan bandingkan dengan nilai mentah di modul.","Lihat LED kanal: wire break atau over/under-range.","Periksa pengaturan tipe input (arus/tegangan) di konfigurasi hardware.","Cek skala engineering unit di program.","Uji kanal lain yang bebas untuk membuktikan modul rusak atau bukan."]},
+
+{id:"hmi",c:"kontrol",i:"🖥️",n:"IAS / AMS workstation (HMI)",en:"marine integrated automation system IAS HMI engine control room",
+ f:"Antarmuka operator di ECR: grafik mimic, alarm, tren, log, dan kendali pompa atau katup. Menjadi dasar kelas UMS (E0) bersama alarm extension.",
+ lok:"Engine Control Room, kabin masinis, anjungan (extension alarm).",
+ k:"PLC mengirim data lewat Ethernet redundan ke workstation. Perangkat lunak SCADA menampilkan nilai, menyimpan riwayat alarm, dan meneruskan alarm ke kabin masinis dan anjungan bila tidak di-acknowledge dalam waktu tertentu (dead-man / duty system).",
+ tp:["Workstation ECR","Panel PC / touchscreen","Server redundan","Extension alarm panel"],
+ mk:["Kongsberg K-Chief","Siemens WinCC","Schneider Citect SCADA","ABB"],
+ bs:[["Jaringan","Ethernet ganda (redundan)"],["Alarm","Prioritas, acknowledge, inhibit logic"],["Eskalasi","Contoh: 2 menit ke kabin dan anjungan"],["Tegangan","24 V DC / 230 V AC via UPS"],["Standar","Type approval kelas, UMS / E0"]],
+ al:["PLC ruang mesin","Ethernet redundan","Server / workstation IAS","Alarm dan tren","Extension alarm"],
+ ts:["Layar mati atau freeze: cek UPS, PSU, kabel Ethernet, switch, dan server.","Data satu grup hilang: cek komunikasi PLC (Modbus/Profinet) dan gateway.","Alarm palsu: cek inhibit logic, sensor, dan setpoint alarm.","Extension alarm tidak bunyi: uji dead-man dan relay ke kabin.","Buat backup konfigurasi dan log secara berkala."]},
+
+{id:"gov",c:"kontrol",i:"🎚️",n:"Electronic governor",en:"electronic governor diesel engine Woodward speed control",
+ f:"Menjaga RPM mesin utama atau diesel generator sesuai setpoint dengan mengatur suplai bahan bakar.",
+ lok:"Mesin utama, diesel generator, panel governor.",
+ k:"Magnetic pickup mengirim frekuensi yang sebanding dengan RPM. Governor membandingkan RPM aktual dengan setpoint (algoritma PID) lalu menggerakkan aktuator rak bahan bakar. Pembagian beban antar generator memakai mode droop atau isochronous dengan load sharing line.",
+ tp:["Elektronik dengan aktuator hidrolik","Elektronik penuh (aktuator elektrik)","Droop / isochronous","Digital PID"],
+ mk:["Woodward","Heinzmann","Regulateurs Europa","Kongsberg"],
+ bs:[["Sensor kecepatan","Magnetic pickup (frekuensi ∝ RPM)"],["Setpoint","4–20 mA / 0–10 V / bus"],["Output aktuator","4–20 mA / PWM / 24 V DC"],["Droop","0–5 % (setting load sharing)"],["Suplai","24 V DC"]],
+ al:["Telegraph / setpoint","Governor (PID)","Aktuator rak bahan bakar","Mesin","Pickup RPM sebagai umpan balik"],
+ ts:["RPM naik turun (hunting): cek gain PID, pickup kotor, dan aktuator macet.","Tidak ada RPM: ukur sinyal pickup (mV AC) dan celah sensor.","Ukur suplai 24 V DC dan kabel setpoint.","Load sharing tidak seimbang: cek droop dan load sharing line.","Bandingkan umpan balik posisi rak dengan output governor."]},
+
+{id:"ecu",c:"kontrol",i:"💻",n:"ECU / CCU mesin elektronik",en:"MAN B&W ME-C engine control system CCU ECU hydraulic cylinder unit",
+ f:"Mengatur waktu dan durasi injeksi bahan bakar serta pembukaan katup buang tiap silinder tanpa camshaft mekanis.",
+ lok:"Panel kontrol mesin utama elektronik (satu unit per silinder).",
+ k:"Encoder engkol mengirim posisi sudut (ketelitian ±0,1°). CCU menghitung timing berdasarkan beban dari governor, lalu mengirim arus ke proportional solenoid pada hydraulic cylinder unit. Tekanan bahan bakar pada injeksi dapat melebihi 1.000 bar.",
+ tp:["CCU (per silinder)","ACU (auxiliary control)","Interface unit ke IAS","Jaringan ECS redundan"],
+ mk:["MAN Energy Solutions (ME-C)","WinGD (Flex)","Wärtsilä","Kongsberg (interface)"],
+ bs:[["Ketelitian sudut","0,1°"],["Tekanan injeksi","> 1.000 bar"],["Arus solenoid","hingga beberapa ampere (driver)"],["Jaringan","Bus redundan"],["Waktu siklus","milidetik"]],
+ al:["Encoder engkol","Electronic governor","ECU / CCU (hitung timing)","Driver amplifier","Proportional valve HCU","Injeksi dan exhaust valve"],
+ ts:["Baca kode alarm di panel operator mesin dan cek manual pabrik.","Cek encoder dan tacho: dua encoder harus sinkron.","Ukur suplai 24 V DC ECU dan fuse.","Cek kabel dan konektor solenoid (resistansi koil).","Ikuti prosedur pabrik sebelum reset. Jangan mengabaikan alarm."]},
+
+{id:"iph",c:"kontrol",i:"💨",n:"I/P converter dan positioner",en:"I/P converter current to pressure positioner control valve",
+ f:"Mengubah sinyal kontrol 4–20 mA menjadi tekanan udara pneumatik (0,2–1,0 bar) untuk menggerakkan control valve.",
+ lok:"Control valve suhu air pendingin (3-way), tekanan uap, viskositas bahan bakar, valve ballast dan bilge.",
+ k:"Arus 4–20 mA mengalir pada koil di dalam converter dan menggerakkan mekanisme flapper–nozzle. Tekanan udara keluaran berubah sebanding arus, lalu menggerakkan aktuator diafragma valve. Positioner menambahkan umpan balik posisi.",
+ tp:["I/P converter","Positioner elektro-pneumatik","Single / double acting","Smart positioner HART"],
+ mk:["Siemens (SIPART PS2)","ABB (TZIDC)","Fisher / Emerson (DVC)","Samson","Festo"],
+ bs:[["Sinyal masuk","4–20 mA"],["Tekanan keluar","0,2–1,0 bar (3–15 psi)"],["Suplai udara","1,4–7 bar, bersih dan kering"],["Aksi","Direct / reverse"],["Feedback","Posisi stem (positioner)"]],
+ al:["PLC / controller PID","Modul analog output 4–20 mA","I/P converter","Udara instrumen","Aktuator dan valve","Umpan balik posisi"],
+ ts:["Ukur mA pada loop output dan amati respons saat setpoint berubah.","Cek kualitas udara instrumen: filter regulator, drain air dan oli.","Bandingkan tekanan keluaran dengan mA: 4 mA ≈ 0,2 bar, 20 mA ≈ 1,0 bar.","Nozzle atau flapper tersumbat: bersihkan sesuai manual.","Periksa linkage valve macet atau packing terlalu kencang."]},
+
+{id:"sol",c:"kontrol",i:"🔧",n:"Solenoid valve",en:"solenoid valve 24V DC marine ASCO",w:"dout",tr:"plc",
+ f:"Membuka atau menutup aliran fluida atau udara (bahan bakar, LO, air, udara pneumatik) atas perintah listrik dari PLC.",
+ lok:"Purifier, boiler, quick-closing valve, sistem udara kontrol, sistem hidrolik.",
+ k:"Koil 24 V DC menghasilkan medan magnet yang menarik plunger sehingga port terbuka atau tertutup. Tipe pilot memakai tekanan fluida untuk menggerakkan diafragma utama. PLC memerintah lewat relay interposing, dan dioda flyback meredam lonjakan saat koil dimatikan.",
+ tp:["2/2, 3/2, 5/2 way","NC (normally closed) / NO","Direct acting / pilot operated","Koil 24 V DC / 110 / 220 V AC","ATEX / Ex-proof untuk area berbahaya"],
+ mk:["ASCO (Emerson)","Parker","Danfoss (EV220B)","Festo","SMC"],
+ bs:[["Tegangan koil","24 V DC (umum)"],["Daya koil","± 8–30 W"],["Tekanan kerja","0–10 bar (tergantung seri)"],["Ukuran port","1/8 inci hingga 2 inci"],["Proteksi","IP65, isolasi kelas F/H"]],
+ al:["Output DO PLC","Relay interposing","Koil solenoid","Plunger dan diafragma","Aliran fluida"],
+ ts:["Ukur tegangan di koil saat diperintah. Harus sekitar 24 V.","Ukur resistansi koil dan bandingkan dengan datasheet: tak terhingga berarti koil putus, mendekati 0 berarti short.","Dengarkan bunyi klik. Tidak ada bunyi berarti tegangan, relay, atau koil bermasalah.","Katup macet karena kotoran atau korosi: bongkar dan bersihkan, cek filter.","Cek relay interposing dan output DO PLC (LED kanal dan fuse)."]},
+
+{id:"opto",c:"kontrol",i:"💡",n:"Optocoupler dan signal isolator",en:"optocoupler galvanic isolation signal isolator 4-20mA",
+ f:"Memisahkan rangkaian lapangan dari PLC secara galvanis agar lonjakan tegangan dan ground loop tidak merusak modul.",
+ lok:"Di dalam modul I/O PLC, kartu isolator di panel, dan interface sinyal.",
+ k:"LED di sisi input memancarkan cahaya ke fototransistor di sisi output. Sinyal berpindah lewat cahaya tanpa sambungan listrik. Isolator sinyal 4–20 mA bekerja sama dan memasang sumber daya terpisah di kedua sisi.",
+ tp:["Optocoupler IC","Signal isolator 4–20 mA","Relay isolasi","Digital isolator"],
+ mk:["Vishay","Broadcom","Toshiba","Phoenix Contact (isolator)","Pepperl+Fuchs"],
+ bs:[["Isolasi IC","2,5–5 kV rms"],["CTR","50–600 %"],["Arus LED","5–20 mA"],["Kecepatan","kHz sampai MHz (tergantung tipe)"],["Fungsi","Memutus ground loop dan lonjakan"]],
+ al:["Sinyal lapangan","LED optocoupler","Fototransistor","Rangkaian PLC","CPU"],
+ ts:["Cek arus LED input (sekitar 10 mA) dan tegangan maju.","Ukur tegangan output saat input ON dan OFF.","Isolator 4–20 mA: bandingkan mA input dan output.","Ganti kartu bila drift atau rusak akibat surge.","Ground loop: periksa ground shield dan potensial referensi."]},
+
+{id:"psu",c:"kontrol",i:"🔋",n:"Power supply 24 V DC dan UPS",en:"24V DC power supply redundancy module UPS DIN rail",
+ f:"Menyediakan 24 V DC stabil untuk PLC, sensor, dan solenoid, dengan cadangan baterai agar automasi tetap hidup saat blackout.",
+ lok:"Panel ECR, panel PLC, emergency switchboard.",
+ k:"Input 230 atau 440 V AC disearahkan dan di-switching menjadi 24 V DC teregulasi. Dua PSU paralel dengan modul redundansi (dioda) dan baterai buffer meningkatkan ketersediaan.",
+ tp:["Switch-mode 24 V DC","Redundan 1+1 dengan modul dioda","Dengan UPS / baterai buffer","DIN-rail"],
+ mk:["Phoenix Contact (QUINT)","Siemens SITOP","Weidmüller","Mean Well","PULS"],
+ bs:[["Output","24 V DC (±1–3 %)"],["Arus","5–40 A tipikal"],["Ripple","< 100 mVpp"],["Input","Sesuai model, 110–440 V AC"],["Proteksi","Short-circuit, overload, overvoltage"]],
+ al:["Tegangan kapal 440/230 V AC","PSU 24 V DC","Modul redundansi","Distribusi fuse / MCB","PLC, sensor, solenoid"],
+ ts:["Ukur output 24 V di terminal PSU dan di ujung beban.","Cek fuse atau MCB hilir, ukur arus total.","Ripple berlebih: cek kapasitor dan kualitas AC masuk.","Uji perpindahan ke baterai atau UPS.","PSU redundan: cek LED DC OK dan modul dioda."]},
+
+/* ============ JARINGAN DATA ============ */
+{id:"rs485",c:"jaringan",i:"🔗",n:"Modbus RTU (RS-485)",en:"Modbus RTU RS-485 wiring termination",w:"rs485",
+ f:"Menghubungkan purifier, generator controller, OWS, dan perangkat lain ke PLC atau IAS memakai dua kawat.",
+ lok:"Kamar mesin: dari perangkat mesin bantu menuju PLC/IAS.",
+ k:"Master mengirim frame (alamat, fungsi, data, CRC) lewat pasangan diferensial A dan B. Slave dengan alamat yang cocok akan menjawab. Sinyal diferensial membuat komunikasi tahan noise pada kabel panjang.",
+ tp:["Modbus RTU (serial)","Modbus TCP (Ethernet)","2-kawat half duplex","4-kawat full duplex"],
+ mk:["Moxa (konverter)","Phoenix Contact","Advantech","Schneider Electric","Siemens"],
+ bs:[["Kecepatan","9,6–115,2 kbps"],["Jarak maks.","± 1.200 m"],["Node","32 unit load (lebih dengan repeater)"],["Terminasi","120 Ω di kedua ujung bus"],["Kabel","Twisted pair berselubung"]],
+ al:["Master (PLC/IAS)","Bus RS-485 A/B","Slave 1: purifier","Slave 2: generator","Slave n: OWS"],
+ ts:["Cek baud rate, parity, stop bit, dan alamat slave.","Tukar polaritas A dan B bila tidak ada respons.","Pasang terminasi 120 Ω hanya di dua ujung bus.","Ukur tegangan A–B saat idle, harus positif (lebih dari sekitar 200 mV).","Gunakan konverter USB-RS485 dan tool Modbus untuk memantau frame."]},
+
+{id:"can",c:"jaringan",i:"🚌",n:"CAN bus dan NMEA 2000",en:"NMEA 2000 CAN bus backbone terminator",
+ f:"Jaringan digital antar sensor navigasi dan kontrol mesin dengan satu backbone kabel.",
+ lok:"Anjungan (sensor navigasi) dan kontrol mesin elektronik.",
+ k:"Semua node berbagi dua kawat (CAN-H dan CAN-L). Pesan berprioritas dikirim bergantian melalui arbitrase bit tanpa master. NMEA 2000 memakai CAN dengan kabel backbone, drop, dan catu daya 12 V DC.",
+ tp:["CAN 2.0","CANopen / J1939","NMEA 2000 (konektor DeviceNet)"],
+ mk:["Maretron","Garmin","Furuno","Raymarine","Vector"],
+ bs:[["Kecepatan CAN","hingga 1 Mbps"],["NMEA 2000","250 kbps"],["Terminator","120 Ω di kedua ujung"],["Node NMEA 2000","maks. 50"],["Backbone","± 200 m (NMEA 2000)"]],
+ al:["Sensor navigasi","Kabel drop","Backbone + terminator","Gateway","ECDIS / autopilot"],
+ ts:["Matikan bus lalu ukur resistansi CAN-H ke CAN-L: sekitar 60 Ω (dua terminator).","Cek catu daya NMEA 2000 dan jumlah node.","Periksa konektor drop dan panjang kabel.","Gunakan CAN analyzer untuk melihat frame error.","Ground shield satu titik."]},
+
+{id:"pnet",c:"jaringan",i:"🌐",n:"PROFIBUS / PROFINET",en:"PROFIBUS PROFINET industrial network marine",
+ f:"Jaringan utama automasi: PLC ke remote I/O, drive, dan HMI.",
+ lok:"Panel PLC, remote I/O, dan switch di kamar mesin.",
+ k:"PROFIBUS DP memakai RS-485 dengan pola master–slave. PROFINET memakai Ethernet industri real-time dengan topologi star atau ring (MRP) untuk redundansi.",
+ tp:["PROFIBUS DP","PROFIBUS PA","PROFINET RT / IRT","Topologi ring (MRP)"],
+ mk:["Siemens","Phoenix Contact","Hirschmann (Belden)","Moxa"],
+ bs:[["PROFIBUS DP","9,6 kbps – 12 Mbps"],["PROFINET","100 Mbps (Fast Ethernet)"],["Node PROFIBUS/segmen","32 (maks. 126 dengan repeater)"],["Kabel PROFIBUS","Ungu, twisted pair berselubung"],["Terminasi","Switch terminator ON di ujung segmen"]],
+ al:["PLC (master)","Switch / repeater","Remote I/O","Drive dan HMI"],
+ ts:["LED BF (bus fault) merah: cek kabel, konektor, dan terminator.","Cek alamat node ganda.","Uji dengan PROFIBUS tester atau tool diagnostik.","PROFINET: cek nama perangkat dan IP.","Cek switch dan media converter, serta kabel patah."]},
+
+{id:"fo",c:"jaringan",i:"🔦",n:"Fiber optic backbone",en:"fiber optic cable marine backbone multimode single mode",
+ f:"Backbone data dari kamar mesin ke anjungan yang kebal terhadap gangguan elektromagnetik.",
+ lok:"Antara ECR dan anjungan, atau antar ruang pada kapal besar.",
+ k:"Sinyal listrik diubah menjadi cahaya oleh transceiver, merambat di inti kaca, lalu diubah kembali di ujung lain. Karena tidak membawa listrik, serat optik kebal terhadap EMI dari motor bertegangan tinggi, transformer, dan pemancar radio.",
+ tp:["Multimode 50/125 (850 nm)","Single-mode 9/125 (1310/1550 nm)","Konektor LC, SC, ST","Media converter / SFP"],
+ mk:["Corning","Prysmian","Belden Hirschmann","Draka"],
+ bs:[["Multimode","hingga ± 500 m–2 km (tergantung kecepatan)"],["Single-mode","hingga puluhan km"],["Kebal EMI","100 %"],["Radius tikung","≥ 10–20 × diameter kabel"],["Alat uji","Optical power meter, OTDR"]],
+ al:["Switch ECR","Transceiver SFP","Kabel fiber","Transceiver anjungan","Switch anjungan"],
+ ts:["Bersihkan konektor dengan pembersih khusus, jangan disentuh.","Ukur daya optik dengan optical power meter.","Gunakan OTDR untuk mencari titik putus atau tikungan tajam.","Cek radius tikung kabel dan kabel terjepit.","Pastikan jenis transceiver dan panjang gelombang cocok di kedua ujung."]},
+
+{id:"n0183",c:"jaringan",i:"📶",n:"NMEA 0183",en:"NMEA 0183 RS-422 talker listener sentence",
+ f:"Standar data serial lama untuk navigasi: GPS, gyro, log, echo sounder ke radar, ECDIS, dan VDR.",
+ lok:"Anjungan dan peralatan navigasi.",
+ k:"Satu talker mengirim kalimat teks ASCII (misalnya $GPGGA) melalui RS-422 ke satu atau beberapa listener. Komunikasi searah, dengan checksum di akhir kalimat.",
+ tp:["4.800 bps (standar)","38.400 bps (high speed)","Talker / listener","Kalimat GGA, RMC, HDT, VTG"],
+ mk:["Furuno","Garmin","Raymarine","JRC","Kongsberg"],
+ bs:[["Kecepatan","4.800 bps"],["Level sinyal","RS-422 diferensial"],["Format","Teks ASCII 8N1"],["Talker","1 per line"],["Listener","hingga ± 10"]],
+ al:["Talker (GPS/gyro)","Kabel RS-422","Listener (radar/ECDIS)","Data navigasi"],
+ ts:["Periksa baud rate dan format pada talker dan listener.","Tukar polaritas A dan B bila tidak ada data.","Gunakan terminal serial untuk melihat kalimat masuk.","Cek checksum atau kalimat yang rusak.","Pastikan hanya satu talker per line."]},
+
+/* ============ NAVIGASI ============ */
+{id:"radar",c:"navigasi",i:"📡",n:"Radar ARPA (X-band / S-band)",en:"marine radar ARPA X-band S-band magnetron",
+ f:"Mendeteksi kapal lain dan daratan, serta menghitung CPA, TCPA, dan risiko tubrukan (ARPA).",
+ lok:"Antena di mast, display di anjungan.",
+ k:"Transmitter memancarkan pulsa gelombang mikro (magnetron atau solid-state). Antena berputar, echo dipantulkan kembali. Jarak dihitung dari waktu tempuh pulsa, arah dari posisi antena. ARPA melacak target dari sapuan ke sapuan untuk menghitung arah dan kecepatan.",
+ tp:["X-band 9 GHz (3 cm)","S-band 3 GHz (10 cm)","Magnetron","Solid-state","Antena scanner dan slot array"],
+ mk:["Furuno (FAR series)","JRC (JMR)","Kelvin Hughes","Raytheon Anschütz","Sperry Marine"],
+ bs:[["Frekuensi X-band","9,3–9,5 GHz"],["Frekuensi S-band","2,9–3,1 GHz"],["Daya magnetron","4–25 kW"],["Lebar pulsa","0,05–1,2 µs"],["Putaran antena","24 / 42 rpm"]],
+ al:["Antena dan transceiver","Pemroses sinyal","ARPA tracker","Display","ECDIS / VDR"],
+ ts:["Periksa suplai, breaker, dan indikator standby atau transmit.","Gambar kabur atau hilang: cek magnetron, tune, dan gain.","Antena tidak berputar: cek motor, belt, dan sinyal heading.","Target tidak terlacak: cek input gyro dan speed log.","Ikuti prosedur keselamatan radiasi saat dekat antena."]},
+
+{id:"fog",c:"navigasi",i:"🧲",n:"Fiber optic gyrocompass (FOG)",en:"fiber optic gyrocompass marine Sagnac effect",
+ f:"Menentukan arah utara sejati kapal tanpa bagian yang bergerak.",
+ lok:"Ruang gyro atau anjungan.",
+ k:"Dua berkas laser berjalan berlawanan arah di dalam gulungan serat optik. Rotasi bumi menimbulkan selisih fase (efek Sagnac). Selisih itu dibaca sebagai laju rotasi dan diolah menjadi heading.",
+ tp:["Gyro FOG","Gyro konvensional (spinning mass)","Repeater dan interface NMEA","Kompensasi kecepatan dan lintang"],
+ mk:["Sperry Marine (Navigat)","Tokyo Keiki","Raytheon Anschütz","Yokogawa"],
+ bs:[["Prinsip","Efek Sagnac"],["Akurasi","tipikal ≤ 0,5° (persyaratan IMO); banyak model lebih baik"],["Bagian bergerak","Tidak ada"],["Waktu siap","beberapa menit"],["Output","NMEA 0183 / 2000, sinkro"]],
+ al:["Gulungan fiber + laser","Pengolah sinyal","Heading","Bus NMEA","Radar, ECDIS, autopilot"],
+ ts:["Bandingkan heading dengan kompas magnet dan azimuth matahari.","Alarm gyro fault: cek suplai, lintang, dan kecepatan yang dimasukkan.","Cek kabel repeater dan interface.","Ikuti prosedur start dan settle time dari manual.","Catat error dan lakukan koreksi sesuai prosedur."]},
+
+{id:"log",c:"navigasi",i:"🚢",n:"Doppler speed log",en:"Doppler speed log marine speed over ground",
+ f:"Mengukur kecepatan kapal terhadap air atau dasar laut (SOG).",
+ lok:"Transducer di lambung, display di anjungan.",
+ k:"Transducer memancarkan gelombang ultrasonik ke dasar laut atau lapisan air. Kapal yang bergerak menggeser frekuensi pantulan (Doppler shift). Pergeseran dihitung menjadi kecepatan.",
+ tp:["Doppler (bottom track)","Doppler (water track)","Electromagnetic log","Pitot log"],
+ mk:["Furuno","JRC","Sperry Marine","Consilium","Skipper"],
+ bs:[["Frekuensi","100–500 kHz"],["Output","NMEA 0183 dan pulsa 200 p/NM"],["Akurasi","± 0,2 knot atau ± 2 % (tipikal)"],["Kedalaman bottom track","hingga ± 200 m"],["Tegangan","24 V DC / 115–230 V AC"]],
+ al:["Transducer","Elektronik log","Output kecepatan","Radar / ECDIS / VDR"],
+ ts:["Cek indikator transducer dan display: bottom lock atau water track.","Bandingkan dengan kecepatan GPS.","Dry-dock: bersihkan transducer dari fouling.","Cek kabel transducer dan konektor.","Periksa parameter kalibrasi."]},
+
+{id:"echo",c:"navigasi",i:"🌊",n:"Echo sounder",en:"marine echo sounder transducer depth",
+ f:"Mengukur kedalaman air di bawah lambung.",
+ lok:"Transducer di lambung, display di anjungan.",
+ k:"Transducer piezoelektrik memancarkan pulsa akustik ke dasar laut dan menerima pantulannya. Kedalaman dihitung dari waktu tempuh pulsa dan kecepatan suara di air (sekitar 1.500 m/s).",
+ tp:["Single frequency (200 kHz)","Dual frequency (50/200 kHz)","Alarm kedalaman dangkal","Output NMEA"],
+ mk:["Furuno (FE-700)","JRC","Skipper","Kongsberg"],
+ bs:[["Frekuensi","50 / 200 kHz"],["Kecepatan suara","≈ 1.500 m/s"],["Rentang","0,5 m hingga ± 2.000 m (tergantung model)"],["Output","NMEA 0183"],["Rumus","Kedalaman = (v × t) / 2"]],
+ al:["Transducer piezo","Transceiver","Display","Alarm kedalaman","VDR / ECDIS"],
+ ts:["Angka kedalaman salah: cek gain, range, dan transducer offset.","Tidak ada echo: cek kabel dan konektor transducer.","Interferensi: pisahkan dari kabel tenaga.","Bandingkan dengan peta dan kedalaman lokal.","Bersihkan transducer dari fouling saat docking."]},
+
+{id:"ecdis",c:"navigasi",i:"🗺️",n:"ECDIS",en:"ECDIS electronic chart display and information system",
+ f:"Peta elektronik resmi untuk perencanaan dan pemantauan pelayaran, menggantikan peta kertas.",
+ lok:"Anjungan.",
+ k:"ECDIS menerima posisi GNSS, heading gyro, kecepatan log, radar, dan AIS, lalu menampilkannya di atas peta ENC. Sistem memberi alarm anti-grounding dan cross-track error.",
+ tp:["ENC (S-57 / S-63)","Primary / backup ECDIS","Standar IEC 61174","Terintegrasi radar dan AIS"],
+ mk:["Furuno (FMD)","JRC (JAN)","Sperry Marine (VisionMaster)","Wärtsilä (Navi-Sailor)","Kongsberg (K-Bridge)"],
+ bs:[["Peta","ENC resmi (S-57/S-63)"],["Input","GNSS, gyro, log, radar, AIS"],["Standar","IMO / IEC 61174"],["Update","Berkala dan sebelum berlayar"],["Alarm","Anti-grounding, XTE, safety contour"]],
+ al:["GNSS, gyro, log","NMEA / bus","ECDIS","Rute dan alarm","Autopilot / VDR"],
+ ts:["Posisi salah: cek GNSS, datum, dan input sensor.","Peta tidak tampil: cek lisensi dan update ENC.","Alarm sensor hilang: cek kabel dan bus NMEA.","Uji backup ECDIS dan sinkronisasi rute.","Ikuti prosedur update peta resmi."]},
+
+{id:"ais",c:"navigasi",i:"🛰️",n:"AIS transponder Class A",en:"AIS transponder Class A VHF SOTDMA",
+ f:"Menyiarkan identitas, posisi, arah, dan kecepatan kapal ke kapal lain dan stasiun pantai.",
+ lok:"Anjungan, antena VHF dan GNSS di mast.",
+ k:"Transponder menerima posisi dari GNSS dan mengirimkan pesan VHF secara berkala memakai skema SOTDMA agar banyak kapal bergantian tanpa bertabrakan.",
+ tp:["Class A","Class B","AIS SART / AtoN","Terhubung ECDIS dan radar"],
+ mk:["Furuno (FA-170)","JRC","Saab","Sailor"],
+ bs:[["Frekuensi","161,975 dan 162,025 MHz"],["Daya","12,5 W"],["Modulasi","GMSK (TDMA)"],["Interval lapor","2–10 detik saat berlayar"],["Data","MMSI, posisi, COG, SOG, heading"]],
+ al:["GNSS","Transponder AIS","Antena VHF","Kapal lain / pantai","Radar / ECDIS"],
+ ts:["Cek status di display: posisi GNSS dan alarm.","Cek data statis (MMSI, nama, tujuan).","Bandingkan posisi dengan GPS lain.","Uji VHF antenna dan VSWR.","Periksa kabel data NMEA."]},
+
+{id:"ap",c:"navigasi",i:"🎡",n:"Autopilot",en:"marine autopilot heading control PID adaptive",
+ f:"Mengemudikan kapal menjaga haluan atau mengikuti rute secara otomatis.",
+ lok:"Anjungan dan steering gear.",
+ k:"Autopilot membandingkan heading gyro dengan haluan tujuan, lalu menghitung sudut kemudi lewat algoritma PID adaptif dan menggerakkan steering gear. Alarm off-heading berbunyi bila kapal menyimpang.",
+ tp:["Heading control","Track control","Adaptive PID","Steering gear interface"],
+ mk:["Raytheon Anschütz","Sperry Marine","Yokogawa","Kongsberg","Tokimec"],
+ bs:[["Input","Heading gyro, rudder feedback"],["Output","Perintah kemudi (solenoid / analog)"],["Algoritma","PID adaptif"],["Alarm","Off-heading, gyro fail"],["Tegangan","24 V DC / AC"]],
+ al:["Heading gyro","Autopilot (PID)","Steering gear","Rudder feedback","Alarm anjungan"],
+ ts:["Cek heading gyro dan rudder feedback.","Hunting kemudi: sesuaikan gain rate dan counter rudder.","Cek kabel dan solenoid steering gear.","Uji mode manual dan non-follow-up.","Ikuti checklist sebelum berangkat."]},
+
+/* ============ KOMUNIKASI ============ */
+{id:"vhf",c:"komunikasi",i:"🎙️",n:"VHF radio dengan DSC",en:"marine VHF radio DSC class A channel 70",
+ f:"Komunikasi suara jarak pendek dan pemanggilan digital marabahaya.",
+ lok:"Anjungan; antena di mast.",
+ k:"Transceiver VHF berkomunikasi line-of-sight. Modul DSC mengirim data digital (FSK) di Channel 70: MMSI, posisi GPS, dan jenis marabahaya, otomatis saat tombol DISTRESS ditekan selama 5 detik.",
+ tp:["VHF Class A DSC","Handheld GMDSS","Watchkeeping receiver Ch 70","Dengan integrasi GNSS"],
+ mk:["Sailor","Icom","Furuno","JRC"],
+ bs:[["Frekuensi","156–174 MHz"],["Channel 16","156,800 MHz (marabahaya)"],["Channel 70","156,525 MHz (DSC)"],["Daya","25 W / 1 W"],["Jarak","≈ 20–30 NM (line-of-sight)"]],
+ al:["Antena VHF","Transceiver","Modul DSC","GNSS","Panel GMDSS"],
+ ts:["Uji internal dan test call sesuai prosedur.","Cek antena, kabel, dan VSWR.","Pastikan posisi GNSS dan MMSI benar.","Cek catu daya utama dan baterai cadangan.","Catat hasil test di GMDSS log."]},
+
+{id:"mfhf",c:"komunikasi",i:"📻",n:"MF/HF radio dengan DSC",en:"marine MF HF radio DSC GMDSS",
+ f:"Komunikasi jarak jauh (Sea Area A3 dan A2) dan panggilan darurat digital.",
+ lok:"Anjungan; antena panjang atau whip.",
+ k:"Gelombang MF/HF memantul di ionosfer (skywave) sehingga dapat menjangkau ribuan mil laut. DSC dikirim di 2.187,5 kHz untuk MF dan frekuensi HF khusus. NBDP dapat dipakai untuk teleks laut.",
+ tp:["MF/HF SSB","DSC scanning receiver","NBDP","Antenna tuner"],
+ mk:["Sailor","Furuno","JRC","Skanti"],
+ bs:[["Frekuensi","1,6–30 MHz"],["DSC MF","2.187,5 kHz"],["Daya","150–500 W (tergantung model)"],["Jarak","hingga ribuan NM"],["Modul","DSC dan NBDP"]],
+ al:["Antena","Antenna tuner","Transceiver MF/HF","Modul DSC/NBDP","Panel GMDSS"],
+ ts:["Cek antena dan tuner: SWR tinggi berarti antena atau isolator bermasalah.","Uji DSC test call.","Periksa suplai dan baterai.","Bersihkan isolator antena dari garam.","Catat hasil test."]},
+
+{id:"satcom",c:"komunikasi",i:"🛰️",n:"Inmarsat / satellite terminal",en:"Inmarsat FleetBroadband Terminal C satellite communication",
+ f:"Komunikasi global suara, data, dan pesan darurat lewat satelit.",
+ lok:"Antena di atas anjungan; unit di ruang radio.",
+ k:"Terminal mengunci satelit geostasioner di orbit atas khatulistiwa dan menukar data pada L-band. Antena stabil memelihara arah walau kapal bergerak.",
+ tp:["Terminal C","FleetBroadband (FBB)","Fleet Xpress","Iridium"],
+ mk:["Cobham Sailor","Thrane & Thrane","JRC","Furuno (Felcom)"],
+ bs:[["Frekuensi","1,5–1,6 GHz (L-band)"],["FBB500","hingga ± 432 kbps"],["Cakupan","global (kecuali kutub)"],["Terminal C","Data teks"],["Catu","24 V DC"]],
+ al:["Antena stabil","BDU / ADU","Terminal","Handset / router","Panel GMDSS"],
+ ts:["Cek status registrasi dan sinyal satelit.","Antena terhalang: cek blocking zone.","Cek kabel antena dan konektor.","Update firmware dan software.","Ikuti prosedur uji rutin."]},
+
+{id:"epirb",c:"komunikasi",i:"🆘",n:"EPIRB 406 MHz",en:"EPIRB 406 MHz COSPAS-SARSAT hydrostatic release",
+ f:"Pemancar darurat otomatis yang mengirim posisi kapal ke satelit pencarian dan penyelamatan.",
+ lok:"Bracket di anjungan dengan hydrostatic release unit (HRU).",
+ k:"Saat kapal tenggelam, HRU melepaskan EPIRB pada kedalaman sekitar 1,5–4 m. EPIRB mengapung, aktif, dan memancarkan sinyal 406 MHz yang membawa identitas dan koordinat GPS ke satelit COSPAS-SARSAT. Sinyal homing 121,5 MHz membantu tim SAR.",
+ tp:["Category 1 (float-free)","Category 2 (manual)","Dengan GPS terpadu","Baterai dan HRU berkala"],
+ mk:["ACR (GlobalFix)","McMurdo (Smartfind)","Jotron (Tron)","Ocean Signal","Sailor"],
+ bs:[["Frekuensi","406 MHz (+121,5 MHz homing)"],["Aktif","≥ 48 jam"],["Umur baterai","± 5 tahun"],["HRU","melepas ± 1,5–4 m"],["Registrasi","Wajib, nomor unik (UIN/HEXID)"]],
+ al:["HRU melepas","EPIRB mengapung","Aktif dan mengirim 406 MHz","Satelit COSPAS-SARSAT","Rescue Coordination Center"],
+ ts:["Lakukan self-test sesuai jadwal dan lihat lampu status.","Cek tanggal kadaluarsa baterai dan HRU.","Pastikan registrasi masih berlaku.","Cek bracket dan posisi EPIRB agar bebas hambatan.","Jangan mengaktifkan tanpa keadaan darurat sungguhan."]},
+
+{id:"sart",c:"komunikasi",i:"🛟",n:"SART 9 GHz (radar transponder)",en:"SART search and rescue transponder 9 GHz X-band",
+ f:"Membantu radar kapal penolong menemukan sekoci atau rakit penyelamat.",
+ lok:"Bracket di anjungan atau sekoci.",
+ k:"SART aktif ketika terkena pulsa radar X-band, lalu menjawab dengan pulsa sapuan sehingga muncul deretan 12 titik pada layar radar kapal pencari.",
+ tp:["SART X-band 9 GHz","AIS-SART","Dengan baterai 5 tahun"],
+ mk:["McMurdo (S4)","Jotron (Tron SART)","Ocean Signal","Sailor"],
+ bs:[["Frekuensi","9 GHz (X-band)"],["Tampilan radar","12 titik"],["Standby","96 jam"],["Aktif","≥ 8 jam menjawab"],["Deteksi","± 5–8 NM ke kapal, hingga ± 30–40 NM ke pesawat"]],
+ al:["Pulsa radar X-band","SART","Balasan sapuan","12 titik di layar radar"],
+ ts:["Uji fungsi dengan radar sesuai prosedur.","Cek masa berlaku baterai.","Periksa segel dan kelembapan.","Simpan pada bracket yang mudah dijangkau.","Catat hasil di log GMDSS."]},
+
+{id:"vsat",c:"komunikasi",i:"🌐",n:"Starlink / VSAT dan IoT gateway",en:"maritime VSAT Starlink marine IoT gateway",
+ f:"Internet kapal untuk crew welfare dan pengiriman data mesin ke kantor darat (Maritime IoT).",
+ lok:"Antena stabil di atas anjungan; gateway di ruang IT/radio.",
+ k:"Data dari PLC dan IAS dibaca oleh IoT edge gateway, dikompresi, lalu dikirim lewat antena VSAT atau LEO ke cloud. Superintendent memantau performa mesin dari laptop atau HP.",
+ tp:["VSAT Ku-band (GEO)","Starlink Maritime (LEO)","IoT edge gateway","Firewall dan VPN"],
+ mk:["Starlink","Marlink","Intellian","KVH","Speedcast"],
+ bs:[["Latensi LEO","± 25–60 ms"],["Latensi GEO","± 600 ms"],["Kecepatan","puluhan hingga ratusan Mbps (tergantung paket)"],["Protokol data","Modbus, OPC UA, MQTT"],["Keamanan","VPN, segmentasi jaringan OT/IT"]],
+ al:["PLC / IAS","IoT edge gateway","Antena VSAT/LEO","Cloud server","Dashboard darat"],
+ ts:["Cek sinyal dan obstruksi antena.","Cek router, firewall, dan VPN.","Pastikan segmentasi jaringan OT dan IT.","Uji gateway membaca data dari IAS.","Cek kuota dan status langganan."]},
+
+/* ============ SAFETY & DETEKSI ============ */
+{id:"fire",c:"safety",i:"🔥",n:"Panel deteksi kebakaran addressable",en:"marine fire detection panel addressable loop Autronica",
+ f:"Memantau detektor asap dan panas di seluruh kapal dan menunjukkan lokasi tepat sumber alarm.",
+ lok:"Panel di anjungan atau ruang kontrol kebakaran (fire control station).",
+ k:"Detektor dipasang pada loop 2-kawat. Tiap detektor punya alamat digital, sehingga panel tahu ruang atau zona persisnya. Panel memantau kabel putus atau korsleting loop.",
+ tp:["Addressable","Konvensional (zona)","Loop tertutup dengan isolator","Interface ke IAS"],
+ mk:["Autronica","Consilium (Marine)","Kidde","Siemens (Cerberus)"],
+ bs:[["Loop","2-kawat, sekitar 24 V DC"],["Alamat","hingga ratusan per loop"],["Panjang loop","± 1–2 km"],["Cadangan daya","Baterai minimum 24 jam (SOLAS)"],["Standar","SOLAS / FSS Code"]],
+ al:["Detektor asap/panas","Loop addressable","Panel kebakaran","Alarm dan zona","Sistem pemadam / IAS"],
+ ts:["Baca pesan panel: fault atau fire, lokasi alamat.","Fault loop: cek kabel putus dan short, isolator.","Detektor kotor: bersihkan atau ganti sesuai manual.","Uji dengan alat uji asap pada detektor.","Jangan menonaktifkan zona tanpa izin dan pencatatan."]},
+
+{id:"smoke",c:"safety",i:"💨",n:"Optical smoke detector",en:"optical smoke detector addressable marine photoelectric",
+ f:"Mendeteksi asap awal kebakaran di kabin, koridor, dan ruang mesin.",
+ lok:"Langit-langit kabin, ruang mesin, dan koridor.",
+ k:"LED inframerah memancarkan cahaya di ruang sensor. Ketika asap masuk, cahaya terbias ke fotodioda dan menghasilkan sinyal yang memicu alarm.",
+ tp:["Optik (photoelectric)","Ionisasi","Detektor panas","Multi-sensor"],
+ mk:["Autronica","Consilium","Apollo","Hochiki"],
+ bs:[["Prinsip","Hamburan cahaya IR"],["Suplai loop","± 15–30 V DC"],["Alamat","digital (addressable)"],["Proteksi","IP44 atau lebih"],["Jarak antar detektor","sesuai standar FSS Code"]],
+ al:["IR LED","Asap masuk","Fotodioda","Sinyal alarm","Panel"],
+ ts:["Alarm palsu: bersihkan debu dan uap.","Uji dengan alat uji asap.","Cek alamat dan basis detektor.","Ganti detektor yang melewati masa pakai.","Cek kabel loop."]},
+
+{id:"omd",c:"safety",i:"🛡️",n:"Oil mist detector (OMD)",en:"oil mist detector crankcase Schaller Visatron Graviner",
+ f:"Mencegah ledakan crankcase dengan mendeteksi kabut minyak sebelum mencapai batas ledak.",
+ lok:"Crankcase mesin utama dan mesin bantu.",
+ k:"Sampel udara dari tiap ruang crankcase dipompa melewati sel optik. Kabut minyak mengurangi intensitas cahaya yang diterima fotodetektor. Bila melewati batas, OMD mengirim alarm dan slowdown atau trip sesuai konfigurasi.",
+ tp:["Sampling (multi-point)","Optical in-crankcase","Dengan pembanding dua jalur"],
+ mk:["Schaller (Visatron)","Graviner (Kidde)","Daihatsu Diesel"],
+ bs:[["Prinsip","Optik, pengurangan cahaya"],["Alarm","≤ 5 % LEL (± 2,5 mg/L)"],["Aksi","Alarm, slowdown, shutdown"],["Suplai","24 V DC"],["Sampling","Kontinu tiap crankcase"]],
+ al:["Sampel crankcase","Sel optik","Pemroses OMD","Alarm/slowdown","Shutdown mesin"],
+ ts:["Alarm high mist: hentikan dan periksa mesin, jangan buka crankcase segera.","Cek sel optik kotor dan filter sampling.","Uji dengan test kit sesuai prosedur.","Cek pipa sampling tersumbat.","Catat semua alarm dan tindakan."]},
+
+{id:"ows",c:"safety",i:"🛢️",n:"15 ppm bilge alarm (OWS monitor)",en:"15 ppm bilge alarm oil content monitor MEPC.107(49) oily water separator",
+ f:"Memastikan air bilge yang dibuang ke laut mengandung minyak di bawah 15 ppm.",
+ lok:"Outlet oily water separator sebelum overboard valve.",
+ k:"Sampel air disinari cahaya. Butiran minyak menghamburkan cahaya sehingga fotodetektor mengukur konsentrasi minyak. Bila kadar mencapai 15 ppm atau lebih, alarm bunyi dan 3-way valve mengalihkan air ke bilge kembali.",
+ tp:["Optical scattering (nephelometer)","Standar MEPC.107(49)","3-way valve recirculating","Log data tersegel"],
+ mk:["Deckma (OMD-2005)","Rivertrace","RWO","Victor Marine"],
+ bs:[["Batas","15 ppm"],["Standar","IMO MEPC.107(49)"],["Prinsip","Hamburan cahaya optik"],["Output","Relay ke valve overboard"],["Kalibrasi","Berkala dengan flushing air bersih"]],
+ al:["Sampel bilge","Sel optik","Pemroses","Relay alarm","3-way valve overboard/bilge"],
+ ts:["Flush sel dengan air bersih bila pembacaan tidak nol.","Cek jendela sel optik kotor.","Uji fungsi dengan sampel kalibrasi.","Cek relay dan 3-way valve.","Catat setiap pembuangan di Oil Record Book."]},
+
+{id:"uv",c:"safety",i:"🔆",n:"UV flame detector dan burner control",en:"UV flame detector boiler burner control unit marine",
+ f:"Memastikan api burner boiler menyala. Jika api padam, burner otomatis trip dan bahan bakar ditutup.",
+ lok:"Ruang bakar auxiliary boiler.",
+ k:"Sensor UV (photocell) merespons cahaya ultraviolet dari api. Burner control unit (ABCU) mengatur urutan purging, ignisi, dan operasi, lalu mematikan burner bila sinyal api hilang melebihi waktu aman.",
+ tp:["UV photocell","IR / flame rod","Burner management (ABCU)","Modulating / on-off"],
+ mk:["Honeywell","Siemens (QRA)","Dungs","Danfoss"],
+ bs:[["Panjang gelombang UV","190–280 nm"],["Waktu respon api padam","≤ beberapa detik (sesuai regulasi)"],["Urutan","Purge, ignition, run, post-purge"],["Output","Relay trip ke solenoid bahan bakar"],["Level air","Interlock dengan DP transmitter"]],
+ al:["Api","Detektor UV","ABCU","Relay trip","Solenoid bahan bakar tutup"],
+ ts:["Lensa UV kotor: bersihkan.","Cek posisi dan sudut pandang detektor ke api.","Cek urutan purge dan waktu ignisi di ABCU.","Uji flame failure sesuai prosedur.","Cek solenoid bahan bakar dan interlock level air."]}
+];
+
+const KM={};KOMP.forEach(k=>KM[k.id]=k);
+
+/* ============ MODUL 1–16 ============ */
+const MOD=[
+{id:"M01",t:"Pengantar elektronika kapal",bab:"Bab 1–2",g:"shipboard electronic systems introduction marine automation",
+ ringkas:"Membedakan sistem tenaga listrik (380–440 V AC, ibarat otot dan tulang kapal) dengan sistem elektronik dan automasi (24 V DC, sinyal mA, ibarat saraf dan otak). Semua sistem disusun dalam piramida otomasi empat level.",
+ topik:["Electrical power vs electronic system","Piramida otomasi: Field, Control, Supervisory, Fleet/Cloud","Pemetaan permesinan dan perangkat elektroniknya","Alur belajar: Identify, Locate, Trace, Measure, Understand, Operate, Monitor, Troubleshoot, Report"],
+ komp:["plc","hmi","ptx","pt100"]},
+{id:"M02",t:"Dasar elektronika",bab:"Pendukung Bab 8",g:"basic electronics diode transistor op-amp marine",
+ ringkas:"Semikonduktor, dioda, transistor, dan op-amp adalah blok dasar pengkondisi sinyal. Dioda flyback melindungi output PLC dari lonjakan koil solenoid.",
+ topik:["Hukum Ohm dan daya DC: V = I × R, P = V × I","Dioda dan flyback diode pada koil","Transistor BJT / MOSFET sebagai saklar","Op-amp sebagai penguat dan filter low-pass"],
+ komp:["opto","psu","sol"]},
+{id:"M03",t:"Sensor dan transducer",bab:"Bab 2–3",g:"sensors and transducers marine PT100 pressure transmitter",
+ ringkas:"Sensor mengubah besaran fisik (suhu, tekanan, level, putaran) menjadi sinyal listrik. Transmitter 4–20 mA dipilih karena arusnya tetap di seluruh loop dan angka 4 mA (live zero) membedakan 0 bar dari kabel putus.",
+ topik:["Sensor suhu: PT100 dan thermocouple","Sensor tekanan dan level: piezoresistif, DP","Proximity dan encoder","Transmitter 2-kawat 4–20 mA","Live zero 4 mA dan NAMUR NE43"],
+ komp:["pt100","tck","ptx","dpt","wtr","prox","enc"]},
+{id:"M04",t:"Signal conditioning dan pengukuran",bab:"Bab 8",g:"signal conditioning ADC galvanic isolation calibration",
+ ringkas:"Sinyal mentah dikuatkan, disaring, diisolasi, lalu diubah oleh ADC menjadi angka. Resolusi ADC menentukan ketelitian: 12-bit memberi 4.096 langkah, 16-bit memberi 65.536 langkah.",
+ topik:["Amplifikasi (op-amp)","Filter low-pass untuk noise VFD","Isolasi galvanis (optocoupler)","ADC 12-bit dan 16-bit","Kalibrasi dengan multimeter dan calibrator"],
+ komp:["aim","opto","pt100"]},
+{id:"M05",t:"Digital logic dan kontrol",bab:"Pendukung",g:"digital logic gates flip-flop interlock ladder",
+ ringkas:"Gerbang logika AND, OR, NOT, dan flip-flop adalah dasar logika interlock dan urutan start-stop yang kemudian diimplementasikan sebagai Ladder di PLC.",
+ topik:["Gerbang AND, OR, NOT, NAND, NOR","Flip-flop dan latching","Logika interlock dan permissive","Dari logika ke Ladder Diagram"],
+ komp:["plc","sol"]},
+{id:"M06",t:"PLC dan programmable control",bab:"Bab 5 dan 15",g:"PLC ladder diagram analog input wiring marine",
+ ringkas:"PLC adalah tulang punggung automasi kapal: memantau, mengontrol, dan menjaga keselamatan. Pengaman kritis tetap harus punya jalur independen. Mengubah urutan kerja cukup lewat program, tanpa mengubah kabel.",
+ topik:["Arsitektur PLC dan siklus scan","Modul DI, DO, AI, AO","Ladder Diagram","Wiring sensor ke modul","Diagnosa LED: POWER, SF, BF"],
+ komp:["plc","rio","aim","sol","prox"]},
+{id:"M07",t:"Jaringan industri kapal",bab:"Bab 9",g:"industrial network Modbus CAN Profibus NMEA fiber optic marine",
+ ringkas:"Ribuan sinyal tidak lagi ditarik satu per satu ke ECR. Sensor dihubungkan ke remote I/O lalu digabung lewat bus serial atau Ethernet. Fiber optic dipakai untuk backbone yang kebal EMI.",
+ topik:["Modbus RTU (RS-485)","CAN bus dan NMEA 2000","PROFIBUS dan PROFINET","NMEA 0183","Fiber optic backbone"],
+ komp:["rs485","can","pnet","fo","n0183"]},
+{id:"M08",t:"UTS (ujian tengah semester)",bab:"M01–M07",exam:true,g:"contoh soal ujian sistem elektronika kapal 4-20mA",
+ ringkas:"Evaluasi tracing skematik, perhitungan sinyal mA, dan studi kasus. Berikut contoh soal latihan beserta jawabannya.",
+ topik:["Tracing loop 4–20 mA dari transmitter sampai IAS","Perhitungan mA, tegangan shunt, dan resolusi ADC","Studi kasus troubleshooting dengan wizard"],
+ komp:["ptx","aim","plc"],
+ extra:"<h4>Contoh soal</h4><ol><li>Tekanan 6,5 bar pada transmitter 0–10 bar. Berapa arus dan tegangan pada shunt 250 Ω?<div class='note'>I = 4 + (6,5/10) × 16 = <b>14,4 mA</b>; V = 0,0144 × 250 = <b>3,6 V</b>.</div></li><li>Arus terukur 8 mA pada transmitter 0–16 bar. Berapa tekanan?<div class='note'>P = (8 − 4)/16 × 16 = <b>4 bar</b>.</div></li><li>Hitung resolusi ADC 12-bit pada rentang 0–10 bar.<div class='note'>10 / 4.096 = <b>0,00244 bar</b> per langkah.</div></li><li>Transmitter terbaca 0 mA dan tegangan di terminal 0 V. Sebutkan tiga kemungkinan penyebab.<div class='note'>Suplai 24 V mati, fuse atau MCB putus, kabel sisi (+) putus.</div></li></ol>"},
+{id:"M09",t:"Integrated Automation System (IAS)",bab:"Bab 10",g:"integrated automation system IAS alarm monitoring UMS marine",
+ ringkas:"IAS menyatukan seluruh subsistem kamar mesin dalam satu antarmuka. Agar kapal mendapat notasi UMS (E0), diperlukan alarm extension: bila alarm tidak di-acknowledge, sinyal dialihkan ke kabin masinis dan anjungan.",
+ topik:["Konsol IAS dan HMI di ECR","Alarm logging dan prioritas","Inhibit alarm logic","Dead-man alarm dan extension alarm","Notasi kelas UMS (E0)"],
+ komp:["hmi","plc","rs485"]},
+{id:"M10",t:"Monitoring mesin dan kontrol elektronik",bab:"Bab 11",g:"electronically controlled engine ME-C CCU encoder governor",
+ ringkas:"Pada mesin tanpa camshaft, waktu injeksi dan katup buang diatur oleh CCU. Encoder engkol memberi posisi sudut hingga 0,1°, CCU menghitung timing, dan proportional solenoid menggerakkan hidrolik.",
+ topik:["Angle encoder / tacho system","Cylinder Control Unit (CCU)","Hydraulic Cylinder Unit","Alur injeksi bahan bakar elektronik","Electronic governor"],
+ komp:["ecu","enc","gov","sol"]},
+{id:"M11",t:"Elektronika navigasi",bab:"Bab 12",g:"navigation electronics gyrocompass speed log echo sounder autopilot",
+ ringkas:"Anjungan memproses sinyal frekuensi radio, gelombang suara, dan sensor posisi. Data mengalir lewat bus NMEA ke ECDIS dan autopilot.",
+ topik:["Gyrocompass FOG dan efek Sagnac","Doppler speed log","Echo sounder","Autopilot","ECDIS"],
+ komp:["fog","log","echo","ap","ecdis"]},
+{id:"M12",t:"Radar, AIS, dan sistem anjungan",bab:"Bab 12",g:"radar ARPA AIS integrated bridge system",
+ ringkas:"Radar ARPA memancarkan pulsa X-band atau S-band dan mengukur echo. AIS menyiarkan identitas dan posisi. Semua terintegrasi di Integrated Bridge System (IBS).",
+ topik:["Radar ARPA X-band dan S-band","Magnetron vs solid-state","AIS Class A","Integrasi IBS lewat NMEA / CAN"],
+ komp:["radar","ais","ecdis","n0183","can"]},
+{id:"M13",t:"GMDSS dan komunikasi elektronik",bab:"Bab 13",g:"GMDSS equipment VHF MF HF DSC EPIRB SART Inmarsat",
+ ringkas:"GMDSS memastikan kapal dapat mengirim dan menerima berita marabahaya. DSC mengirim MMSI, posisi, dan jenis bahaya hanya dengan menekan tombol DISTRESS 5 detik. EPIRB dan SART adalah perangkat darurat mandiri.",
+ topik:["VHF, MF/HF, dan satelit","Digital Selective Calling (DSC)","EPIRB 406 MHz dan HRU","SART 9 GHz","Uji dan log GMDSS"],
+ komp:["vhf","mfhf","satcom","epirb","sart","vsat"]},
+{id:"M14",t:"Sistem safety dan deteksi",bab:"Bab 14",g:"fire detection oil mist detector bilge alarm marine safety",
+ ringkas:"Sistem proteksi bekerja independen dari kontrol utama agar tetap tersedia bila sistem kontrol gagal. Contohnya panel kebakaran addressable, oil mist detector, 15 ppm bilge alarm, dan flame detector boiler.",
+ topik:["Panel deteksi kebakaran addressable","Optical smoke detector","Oil mist detector crankcase","15 ppm bilge alarm","Flame failure boiler"],
+ komp:["fire","smoke","omd","ows","uv"]},
+{id:"M15",t:"Troubleshooting dan maintenance",bab:"Bab 15",g:"troubleshooting PLC 4-20mA fault finding marine electronics",
+ ringkas:"Gunakan urutan tetap: gejala, inspeksi visual, pengukuran sinyal, isolasi kartu, perbaikan atau ganti. Jangan menebak. Ground shield hanya satu titik di sisi panel untuk mencegah ground loop.",
+ topik:["Algoritma gangguan panel otomasi","Status LED PLC","Grounding dan shielding satu titik","Uji PT100 dengan multimeter","Uji loop 4–20 mA"],
+ komp:["pt100","ptx","plc","opto"],go:"trouble"},
+{id:"M16",t:"UAS (ujian akhir semester)",bab:"M09–M15",exam:true,g:"ujian praktik tracing pengukuran fault finding sistem elektronika kapal",
+ ringkas:"Ujian praktik berbasis station: tracing sistem, pengukuran, dan fault finding. Taruna diminta menjelaskan alur sinyal, mengukur dengan benar, dan menyimpulkan penyebab.",
+ topik:["Station 1: tracing loop 4–20 mA","Station 2: uji PT100 dan modul RTD","Station 3: diagnosa PLC dari LED","Station 4: jaringan Modbus / alarm IAS","Laporan hasil dan rekomendasi"],
+ komp:["ptx","pt100","plc","rs485","hmi"],go:"trouble",
+ extra:"<div class='note'>Rubrik saran: ketepatan langkah pengukuran, keselamatan kerja, ketepatan diagnosa, dan kualitas laporan.</div>"}
+];
+
+/* ============ PIRAMIDA ============ */
+const LVL=[
+{lv:3,t:"Level 3: Fleet dan Cloud (IoT)",sub:"Pemantauan dari darat lewat satelit",w:"52%",col:"#7a5a12",
+ ringkas:"Data dari IAS dan PLC dikirim lewat gateway dan satelit ke cloud sehingga superintendent memantau performa mesin dan bahan bakar dari darat.",
+ komp:["vsat","satcom"],g:"maritime IoT fleet monitoring satellite shore",contoh:"Fuel monitoring, engine performance analytics, condition monitoring."},
+{lv:2,t:"Level 2: Supervisory (IAS/HMI)",sub:"ECR: alarm, tren, log",w:"68%",col:"#13448a",
+ ringkas:"Workstation di ECR menampilkan mimic, alarm, dan tren; melakukan logging dan meneruskan alarm ke kabin masinis dan anjungan.",
+ komp:["hmi","rs485","pnet"],g:"integrated automation system supervisory HMI marine",contoh:"Alarm logging, dead-man alarm, trend, kontrol pompa dan katup."},
+{lv:1,t:"Level 1: Control (PLC dan ECU)",sub:"Logika, governor, safety",w:"84%",col:"#0f6b62",
+ ringkas:"PLC dan ECU membandingkan sinyal dengan setpoint, menjalankan logika, dan memerintah aktuator. Ini otak kontrol kamar mesin.",
+ komp:["plc","ecu","gov","aim","rio"],g:"marine PLC ECU governor control level",contoh:"Auto-start generator saat blackout, desludging purifier otomatis, injeksi elektronik."},
+{lv:0,t:"Level 0: Field (sensor dan aktuator)",sub:"PT100, transmitter 4–20 mA, solenoid",w:"100%",col:"#6b2a2a",
+ ringkas:"Sensor membaca kondisi fisik dan aktuator menjalankan perintah. Semua sinyal lahir di sini.",
+ komp:["pt100","ptx","prox","sol","iph","enc"],g:"field level sensors actuators marine automation",contoh:"PT100, transmitter tekanan, proximity, solenoid, I/P converter."}
+];
+
+const TECH=[
+{t:"Automation",sub:"Mesin bekerja mandiri lewat PLC",badge:"Automasi",
+ ringkas:"Sensor membaca parameter, dikirim ke PLC, dibandingkan dengan setpoint, lalu PLC menggerakkan aktuator. Keputusan ada di program PLC di kapal.",
+ contoh:"Auto-start generator saat blackout, auto-desludging purifier.",komp:["plc","sol","prox"],g:"industrial automation PLC marine auto start generator"},
+{t:"Remote control",sub:"Kendali jarak jauh oleh manusia",badge:"Remote control",
+ ringkas:"Manusia menggeser tuas telegraph di anjungan. Sinyal elektrik dikirim ke ECR lalu ke governor mesin utama. Keputusan ada di operator.",
+ contoh:"Mengatur RPM mesin utama dari anjungan (bridge control).",komp:["gov","ecu","hmi"],g:"bridge control engine telegraph remote control marine"},
+{t:"Maritime IoT",sub:"Data kapal ke darat via satelit",badge:"IoT maritim",
+ ringkas:"Data dari PLC dan IAS diambil oleh IoT edge gateway, dikompresi, dikirim lewat Starlink atau Inmarsat ke cloud. Keputusan ada di dashboard manajemen darat.",
+ contoh:"Fuel monitoring oleh kantor pusat.",komp:["vsat","satcom","rs485"],g:"maritime IoT edge gateway Starlink ship data"},
+{t:"Autonomous ship (MASS)",sub:"Kapal mengambil keputusan mandiri",badge:"Kapal otonom",
+ ringkas:"Kamera AI, LiDAR, radar ARPA, kamera termal, dan AIS digabung (sensor fusion). Mesin AI menghitung risiko tubrukan berdasarkan COLREGs lalu mengirim perintah ke autopilot, governor, dan thruster.",
+ contoh:"YARA Birkeland, kapal kontainer listrik otonom pertama di dunia.",komp:["radar","ais","ecdis","ap","gov"],g:"autonomous ship MASS YARA Birkeland sensor fusion COLREGs"}
+];
+
+/* ============ GLOSARIUM ============ */
+const TERM=[
+["ADC","Analog-to-Digital Converter: mengubah sinyal kontinu (1–5 V) menjadi angka digital untuk CPU PLC."],
+["AI / AO / DI / DO","Analog Input, Analog Output, Digital Input, Digital Output: jenis kanal modul PLC."],
+["AMS","Alarm Monitoring System: sistem pemantau dan pencatat alarm permesinan."],
+["ARPA","Automatic Radar Plotting Aid: fitur radar untuk melacak target dan menghitung CPA/TCPA."],
+["COLREGs","Aturan pencegahan tubrukan di laut. Menjadi dasar keputusan kapal otonom."],
+["DSC","Digital Selective Calling: panggilan digital GMDSS berisi MMSI, posisi, dan jenis bahaya."],
+["ECDIS","Electronic Chart Display and Information System: peta elektronik resmi untuk navigasi."],
+["ECR","Engine Control Room: ruang kontrol mesin."],
+["Encoder","Sensor posisi atau putaran yang menghasilkan pulsa A, B, dan Z."],
+["EMI","Electromagnetic Interference: gangguan elektromagnetik terhadap sinyal."],
+["EPIRB","Emergency Position Indicating Radio Beacon: pemancar darurat 406 MHz."],
+["Fieldbus","Jaringan digital yang menghubungkan sensor dan aktuator ke PLC."],
+["FOG","Fiber Optic Gyrocompass: gyro berbasis efek Sagnac tanpa bagian bergerak."],
+["GMDSS","Global Maritime Distress and Safety System."],
+["Galvanic isolation","Pemisahan listrik antar dua rangkaian, misalnya dengan optocoupler."],
+["Ground loop","Arus tak diinginkan akibat dua titik ground pada shield kabel sinyal."],
+["HART","Protokol digital yang ditumpangkan pada sinyal 4–20 mA."],
+["HMI","Human-Machine Interface: layar operator."],
+["IAS","Integrated Automation System."],
+["Ladder Diagram","Bahasa pemrograman PLC berbentuk anak tangga relay."],
+["Live zero","Nilai 4 mA sebagai batas bawah agar 0 mA dapat dikenali sebagai kabel putus."],
+["MASS","Maritime Autonomous Surface Ships."],
+["Modbus","Protokol komunikasi serial industri, sering di RS-485."],
+["OMD","Oil Mist Detector: pendeteksi kabut minyak crankcase."],
+["PID","Proporsional-Integral-Derivatif: algoritma kontrol umpan balik."],
+["PT100","Sensor suhu platina dengan resistansi 100 Ω pada 0 °C."],
+["SCADA","Supervisory Control and Data Acquisition."],
+["SART","Search and Rescue Transponder 9 GHz."],
+["Setpoint","Nilai target yang ingin dicapai kontroler."],
+["Shunt","Resistor presisi (250 Ω) yang mengubah arus 4–20 mA menjadi 1–5 V."],
+["UMS / E0","Unattended Machinery Space: kamar mesin tanpa jaga manusia."]
+];
+
+/* ============ RUMUS ============ */
+const FORM=[
+{t:"Hukum Ohm dan daya DC",f:"V = I × R<br>P = V × I<br>P = I² × R",g:"hukum ohm daya listrik DC"},
+{t:"Sinyal 4–20 mA ke tekanan",f:"I = 4 + [(P − Pmin)/(Pmax − Pmin)] × 16<br>P = Pmin + [(I − 4)/16] × (Pmax − Pmin)",g:"4-20mA to pressure formula"},
+{t:"Arus ke tegangan shunt PLC",f:"V = I × 250 Ω<br>4 mA → 1,0 V<br>12 mA → 3,0 V<br>20 mA → 5,0 V",g:"4-20mA 250 ohm shunt resistor 1-5V"},
+{t:"PT100 (Callendar–Van Dusen, t ≥ 0 °C)",f:"R(t) = 100 × (1 + 3,9083×10⁻³·t − 5,775×10⁻⁷·t²)<br>0 °C → 100 Ω<br>100 °C → 138,51 Ω",g:"PT100 resistance table formula Callendar Van Dusen"},
+{t:"Resolusi ADC",f:"Langkah = 2ⁿ<br>12-bit = 4.096<br>16-bit = 65.536<br>Presisi = Rentang / Langkah",g:"ADC resolution formula bits"},
+{t:"Suplai loop 4–20 mA",f:"V_suplai ≥ V_min_transmitter + I_maks × (R_beban + R_kabel)<br>Contoh: 10,5 + 0,022 × (250 + 20) = 16,4 V",g:"4-20mA loop power supply voltage calculation compliance"}
+];
+
+/* ============ WIZARD TROUBLESHOOTING ============ */
+const TREES={
+loop:{t:"Sinyal 4–20 mA / sensor fault",start:"a",n:{
+ a:{q:"Ukur tegangan DC pada terminal transmitter (+) dan (−). Berapa hasilnya?",o:[["0 V","b"],["Sekitar 18–24 V","c"],["Rendah (kurang dari 10 V)","d"]]},
+ b:{r:{t:"Suplai atau kabel sisi (+) terputus",s:["Ukur 24 V di keluaran PSU.","Periksa fuse atau MCB loop.","Periksa kabel dan terminal dari PSU ke transmitter (putus atau longgar).","Perbaiki, lalu ulangi pengukuran."],g:"4-20mA loop no power troubleshooting"}},
+ d:{r:{t:"Tegangan jatuh: beban terlalu besar atau arus bocor",s:["Cek jumlah beban seri di loop dan hitung suplai minimum.","Periksa kabel basah, terminal korosi, atau isolasi rusak.","Ukur tegangan output PSU saat berbeban (overload?).","Perbaiki atau pisahkan beban."],g:"4-20mA loop low voltage troubleshooting"}},
+ c:{q:"Seri-kan multimeter mode mA. Berapa arus loop?",o:[["0 mA","e"],["Kurang dari 3,8 mA atau lebih dari 20,5 mA","f"],["Antara 4–20 mA","h"]]},
+ e:{r:{t:"Loop terbuka atau kanal AI rusak",s:["Cek kabel return dan terminal AI.","Ukur langsung di terminal modul AI.","Uji kanal AI cadangan dengan simulator mA.","Perbaiki wiring atau ganti modul."],g:"4-20mA open loop 0 mA troubleshooting"}},
+ f:{r:{t:"Transmitter rusak atau sensor terkontaminasi",s:["Bandingkan dengan manometer lokal.","Periksa port tekanan tersumbat atau diafragma bocor.","Kalibrasi ulang zero dan span. Jika tidak stabil, ganti transmitter.","Catat serial number dan tanggal kalibrasi."],g:"pressure transmitter fail low high NAMUR NE43 troubleshooting"}},
+ h:{q:"Bandingkan dengan manometer lokal. Apa yang terjadi?",o:[["mA tidak sesuai manometer (drift)","i"],["mA sesuai, tetapi IAS menampilkan angka salah","j"],["mA berfluktuasi atau bergoyang","k"]]},
+ i:{r:{t:"Drift kalibrasi transmitter",s:["Kalibrasi zero dan span dengan pressure calibrator.","Periksa suhu dan getaran berlebih.","Jika drift berulang, ganti transmitter.","Dokumentasikan hasil kalibrasi."],g:"pressure transmitter calibration zero span procedure"}},
+ j:{r:{t:"Masalah skala di PLC atau IAS",s:["Cek rentang engineering unit (Pmin, Pmax) di program.","Cek tipe input modul AI (arus atau tegangan).","Periksa kanal atau tag yang salah.","Uji dengan simulator mA dan lihat nilai di IAS."],g:"PLC analog scaling 4-20mA troubleshooting"}},
+ k:{r:{t:"Noise atau ground loop",s:["Periksa shield: hanya di-ground satu titik di sisi panel.","Jauhkan kabel sinyal dari kabel tenaga dan VFD.","Gunakan twisted pair berselubung dan isolator sinyal bila perlu.","Cek terminal longgar."],g:"4-20mA noise ground loop shield grounding"}}
+}},
+plc:{t:"LED PLC tidak normal",start:"a",n:{
+ a:{q:"LED apa yang menyala pada CPU PLC?",o:[["POWER mati","b"],["SF (system fault) merah","c"],["RUN hijau tetapi kanal I/O merah","d"],["BF (bus fault) merah","e"]]},
+ b:{r:{t:"Tidak ada daya ke PLC",s:["Ukur suplai 24 V DC atau 220 V AC.","Periksa fuse dan MCB.","Periksa kartu power supply internal.","Pasang kembali dan amati LED."],g:"PLC power LED off troubleshooting"}},
+ c:{r:{t:"System fault atau kesalahan program/hardware",s:["Sambungkan laptop dan baca diagnostic buffer.","Cek modul yang dicabut, salah slot, atau rusak.","Cek baterai backup memori.","Reset CPU sesuai prosedur setelah penyebab ditemukan."],g:"PLC SF LED system fault diagnostic buffer"}},
+ d:{r:{t:"Masalah sinyal lapangan",s:["Ukur mA atau V pada kanal yang merah.","Periksa kabel field dan sensor.","Periksa terminal longgar.","Uji dengan simulator."],g:"PLC IO fault channel LED troubleshooting"}},
+ e:{r:{t:"Gangguan jaringan bus",s:["Cek kabel bus, konektor, dan terminator.","Cek alamat node ganda.","Ukur dengan bus tester.","Ganti kabel atau konektor yang rusak."],g:"PLC BF bus fault Profibus Profinet troubleshooting"}}
+}},
+pt100:{t:"PT100 / suhu tampil salah",start:"a",n:{
+ a:{q:"Lepas PT100 dari terminal dan ukur resistansinya. Hasilnya?",o:[["Tak terhingga (OL)","b"],["Mendekati 0 Ω","c"],["Wajar (misalnya 100–140 Ω), tetapi IAS salah","d"],["Dua kawat merah berbeda lebih dari 1 Ω","e"]]},
+ b:{r:{t:"Elemen atau kabel putus",s:["Ukur langsung di kepala sensor untuk memisahkan kabel dan sensor.","Ganti sensor bila elemen putus.","Perbaiki kabel putus atau terminal.","Uji ulang."],g:"PT100 open circuit troubleshooting"}},
+ c:{r:{t:"Korsleting",s:["Periksa air atau kelembapan di kepala sensor.","Periksa isolasi kabel dan tekukan tajam.","Ganti sensor atau kabel yang korslet.","Uji ulang."],g:"PT100 short circuit troubleshooting"}},
+ d:{r:{t:"Masalah modul atau skala",s:["Cek tipe sensor di konfigurasi modul (PT100, 3-kawat).","Cek rentang skala di PLC.","Uji dengan simulator RTD atau resistor presisi.","Cek grounding shield."],g:"PLC RTD module PT100 configuration troubleshooting"}},
+ e:{r:{t:"Kabel 3-kawat tidak seimbang",s:["Periksa terminal dan sambungan kedua kawat merah.","Cek korosi pada konektor.","Ganti kabel bila tahanan tidak sama.","Uji ulang."],g:"PT100 3 wire compensation lead resistance"}}
+}}
+};
+
+/* ============ STUDI KASUS: ALARM LO PRESS LOW ============ */
+const CASE1=[
+{lvl:0,t:"Sensor membaca tekanan",p:"Pressure transmitter (mis. Danfoss MBS 3000) terpasang di manifold oli pelumas Main Engine. Diafragma menekan sesuai tekanan oli. Tekanan normal ± 3–4 bar menghasilkan arus sekitar 8–9 mA.",komp:"ptx"},
+{lvl:0,t:"Sinyal berjalan lewat kabel lapangan",p:"Arus 4–20 mA mengalir lewat kabel <code>shielded twisted-pair</code> dari mesin ke ECR, bisa 50–100 m. Yang berjalan adalah arus, bukan tegangan — sehingga tidak melemah walau kabel panjang.",komp:"ptx"},
+{lvl:1,t:"Sinyal masuk PLC dan diubah jadi angka",p:"Arus melewati resistor 250 Ω menjadi 1–5 V DC. Modul ADC PLC mengubahnya jadi angka digital, lalu program menerjemahkannya kembali ke satuan bar.",komp:"aim"},
+{lvl:1,t:"PLC membandingkan dengan setpoint",p:"Program sudah diberi ambang: normal di atas 1,5 bar, alarm di bawah 1,5 bar, shutdown di bawah 1,0 bar. Saat oli turun ke 1,3 bar (± 6,08 mA), PLC mendeteksi di bawah ambang alarm.",komp:"plc"},
+{lvl:1,t:"PLC mengeksekusi logika",p:"PLC menyalakan horn alarm di ECR lewat output digital, dan bila turun lagi ke titik shutdown, mengaktifkan solenoid shut-off Main Engine. Data status juga dikirim ke Level 2.",komp:"sol"},
+{lvl:2,t:"Tampil di layar IAS",p:"Data dikirim lewat Ethernet redundan ke workstation IAS. Layar menampilkan teks merah <code>LO PRESS LOW</code> lengkap waktu kejadian yang otomatis tercatat di alarm log.",komp:"hmi"},
+{lvl:2,t:"Eskalasi bila tidak direspons (dead-man alarm)",p:"Bila dalam 2 menit tidak ada acknowledge di ECR, alarm otomatis dialihkan ke kabin masinis jaga dan anjungan — bagian dari syarat notasi kelas UMS/E0.",komp:"hmi"},
+{lvl:3,t:"(Opsional) Naik ke cloud/IoT",p:"Bila kapal ber-Starlink/VSAT, kejadian ini juga terkirim ke dashboard superintendent di darat — bukan untuk bertindak real-time, tapi untuk analisis tren.",komp:"vsat"}
+];
+function renderCase(){
+ $("#tlBody").innerHTML=CASE1.map((c,i)=>'<div class="tlrow lvl'+c.lvl+'"><div class="tlnum">'+(i+1)+'</div><div class="tlcard"><span class="lvltag">Level '+c.lvl+' · '+CAT[KM[c.komp].c][0]+'</span><b>'+c.t+'</b><p>'+c.p+'</p><div class="chips2" style="margin-top:8px"><button class="chip" data-act="komp:'+c.komp+'">'+KM[c.komp].i+' '+KM[c.komp].n+'</button></div></div></div>').join("");
+ $("#tlLinks").innerHTML=ext(GI("alarm sequence PLC IAS marine engine diagram"),"🖼️ Diagram alur alarm","pri")+ext(GV("PLC alarm dead man system marine engine room"),"🎬 Video")+ext(G("UMS unattended machinery space dead man alarm requirements"),"🔎 Syarat UMS/E0");
+}
+
+/* ============ KUIS ============ */
+const QUIZ=[
+{q:"Arus 4 mA pada transmitter menandakan…",o:["Kabel putus","Nilai minimum pengukuran (0 %)","Nilai maksimum","Korsleting"],a:1,e:"4 mA adalah live zero: batas bawah pengukuran. Kabel putus terbaca 0 mA."},
+{q:"Tekanan 7,5 bar pada transmitter 0–10 bar menghasilkan arus…",o:["14 mA","16 mA","17 mA","18 mA"],a:1,e:"I = 4 + (7,5/10) × 16 = 16 mA."},
+{q:"Arus 12 mA melewati shunt 250 Ω. Tegangannya…",o:["2 V","3 V","4 V","5 V"],a:1,e:"V = 0,012 × 250 = 3 V."},
+{q:"Shield kabel 4–20 mA sebaiknya di-ground…",o:["Di kedua ujung","Hanya di sisi lapangan","Satu titik di sisi panel","Tidak perlu"],a:2,e:"Grounding satu titik di sisi panel mencegah ground loop."},
+{q:"LED SF merah pada CPU PLC menandakan…",o:["Suplai mati","System fault: baca diagnostic buffer","Bus tidak terhubung","Program berjalan normal"],a:1,e:"SF = system fault. Hubungkan laptop dan periksa diagnostic buffer."},
+{q:"Resistansi PT100 pada 0 °C adalah…",o:["0 Ω","50 Ω","100 Ω","138,5 Ω"],a:2,e:"PT100 bernilai 100 Ω pada 0 °C dan 138,5 Ω pada 100 °C."},
+{q:"Komponen pemisah galvanis berbasis cahaya adalah…",o:["Resistor","Optocoupler","Kapasitor","Dioda zener"],a:1,e:"Optocoupler memindahkan sinyal lewat cahaya tanpa sambungan listrik."},
+{q:"Pada kapal otonom, keputusan navigasi diambil oleh…",o:["Perwira jaga","Operator darat saja","Algoritma AI dengan engine COLREGs","Tuas telegraph"],a:2,e:"Autonomous ship memproses sensor fusion dengan AI dan aturan COLREGs."}
+];
+
+/* ============ HELPER ============ */
+const $=s=>document.querySelector(s);
+const G=q=>"https://www.google.com/search?q="+encodeURIComponent(q);
+const GI=q=>"https://www.google.com/search?tbm=isch&q="+encodeURIComponent(q);
+const GV=q=>"https://www.google.com/search?tbm=vid&q="+encodeURIComponent(q);
+const ext=(href,txt,cls)=>'<a class="gbtn '+(cls||"")+'" href="'+href+'" target="_blank" rel="noopener noreferrer">'+txt+'</a>';
+const flow=al=>'<div class="flow">'+al.map((x,i)=>'<span class="fb">'+x+'</span>'+(i<al.length-1?'<span class="fa">➜</span>':"")).join("")+'</div>';
+const GEN="ESS";
+
+/* ============ WIRING SVG ============ */
+const SV_LOOP='<svg class="sv" viewBox="0 0 640 250" role="img" aria-label="Wiring loop 4–20 mA dua kawat">'+
+'<rect class="bx" x="16" y="70" width="120" height="130"/><text x="76" y="98" text-anchor="middle">PSU 24 V DC</text><text class="sm" x="76" y="115" text-anchor="middle">panel ECR</text>'+
+'<circle class="tm" cx="136" cy="100" r="5"/><circle class="tm" cx="136" cy="170" r="5"/><text class="sm" x="124" y="104" text-anchor="end">+</text><text class="sm" x="124" y="174" text-anchor="end">−</text>'+
+'<rect class="bx" x="230" y="14" width="170" height="82"/><text x="315" y="42" text-anchor="middle">TRANSMITTER</text><text class="sm" x="315" y="60" text-anchor="middle">2-kawat, di mesin</text>'+
+'<circle class="tm" cx="230" cy="55" r="5"/><circle class="tm" cx="400" cy="55" r="5"/><text class="sm" x="242" y="59">+</text><text class="sm" x="388" y="59" text-anchor="end">−</text>'+
+'<rect class="bx" x="470" y="70" width="154" height="130"/><text x="547" y="92" text-anchor="middle">MODUL AI PLC</text>'+
+'<circle class="tm" cx="470" cy="100" r="5"/><circle class="tm" cx="470" cy="170" r="5"/>'+
+'<path class="rs" d="M470 100 H490 V112 l-8 6 l16 12 l-16 12 l16 12 l-16 12 l8 4 H470"/>'+
+'<text class="sm" x="515" y="138">R = 250 Ω</text><text class="sm" x="515" y="154">1–5 V ke ADC</text>'+
+'<path class="wl" d="M136 100 H180 V55 H230"/><path class="wl" d="M400 55 H430 V100 H470"/><path class="wl" d="M470 170 H136"/>'+
+'<text class="sm" x="432" y="46">I = 4–20 mA</text>'+
+'<text class="sm" x="320" y="228" text-anchor="middle">Kabel twisted-pair berselubung. Shield di-ground satu titik di panel.</text></svg>';
+
+const SV_RTD='<svg class="sv" viewBox="0 0 640 240" role="img" aria-label="Wiring PT100 tiga kawat">'+
+'<rect class="bx" x="16" y="30" width="150" height="160"/><text x="91" y="52" text-anchor="middle">PT100 3-kawat</text>'+
+'<rect class="rs" x="40" y="95" width="40" height="60" rx="4"/><text class="sm" x="60" y="130" text-anchor="middle">Rt</text>'+
+'<path class="wl wr" d="M60 95 V70 H166"/><path class="wl wr" d="M60 95 V85 H120 V100 H166"/><path class="wl ww" d="M60 155 V160 H166"/>'+
+'<circle class="tm" cx="166" cy="70" r="5"/><circle class="tm" cx="166" cy="100" r="5"/><circle class="tm" cx="166" cy="160" r="5"/>'+
+'<rect class="bx" x="460" y="30" width="164" height="160"/><text x="542" y="52" text-anchor="middle">MODUL RTD / AI</text>'+
+'<circle class="tm" cx="460" cy="70" r="5"/><circle class="tm" cx="460" cy="100" r="5"/><circle class="tm" cx="460" cy="160" r="5"/>'+
+'<text class="sm" x="474" y="74">1 I+ (eksitasi)</text><text class="sm" x="474" y="104">2 M+ (sense)</text><text class="sm" x="474" y="164">3 M− / I−</text>'+
+'<path class="wl wr" d="M171 70 H455"/><path class="wl wr" d="M171 100 H455"/><path class="wl ww" d="M171 160 H455"/>'+
+'<text class="sm" x="310" y="62" text-anchor="middle">merah</text><text class="sm" x="310" y="92" text-anchor="middle">merah</text><text class="sm" x="310" y="152" text-anchor="middle">putih</text>'+
+'<text class="sm" x="320" y="222" text-anchor="middle">Dua kawat merah ke sisi elemen yang sama. Modul mengurangi tahanan kabel.</text></svg>';
+
+const SV_PROX='<svg class="sv" viewBox="0 0 640 230" role="img" aria-label="Wiring proximity sensor PNP tiga kawat">'+
+'<rect class="bx" x="16" y="24" width="170" height="150"/><text x="101" y="50" text-anchor="middle">PROXIMITY PNP</text><text class="sm" x="101" y="68" text-anchor="middle">3-kawat, 24 V DC</text>'+
+'<rect class="bx" x="450" y="24" width="174" height="150"/><text x="537" y="50" text-anchor="middle">MODUL DI PLC</text>'+
+'<circle class="tm" cx="186" cy="90" r="5"/><circle class="tm" cx="186" cy="120" r="5"/><circle class="tm" cx="186" cy="150" r="5"/>'+
+'<circle class="tm" cx="450" cy="90" r="5"/><circle class="tm" cx="450" cy="120" r="5"/><circle class="tm" cx="450" cy="150" r="5"/>'+
+'<path class="wl wbr" d="M191 90 H445"/><path class="wl wbl" d="M191 120 H445"/><path class="wl wbk" d="M191 150 H445"/>'+
+'<text class="sm" x="318" y="82" text-anchor="middle">coklat: +24 V</text><text class="sm" x="318" y="112" text-anchor="middle">biru: 0 V</text><text class="sm" x="318" y="142" text-anchor="middle">hitam: sinyal</text>'+
+'<text class="sm" x="462" y="94">L+ 24 V</text><text class="sm" x="462" y="124">M 0 V</text><text class="sm" x="462" y="154">DI x.x</text>'+
+'<text class="sm" x="320" y="206" text-anchor="middle">PNP: sinyal +24 V saat target terdeteksi. Cocokkan dengan tipe modul DI.</text></svg>';
+
+const SV_DOUT='<svg class="sv" viewBox="0 0 640 240" role="img" aria-label="Wiring output PLC ke relay dan solenoid">'+
+'<rect class="bx" x="16" y="40" width="120" height="150"/><text x="76" y="64" text-anchor="middle">OUTPUT DO PLC</text>'+
+'<circle class="tm" cx="136" cy="80" r="5"/><circle class="tm" cx="136" cy="160" r="5"/><text class="sm" x="124" y="84" text-anchor="end">Q0.0</text><text class="sm" x="124" y="164" text-anchor="end">0 V</text>'+
+'<rect class="bx" x="230" y="40" width="130" height="150"/><text x="295" y="62" text-anchor="middle">RELAY</text><text class="sm" x="295" y="76" text-anchor="middle">interposing</text>'+
+'<rect class="rs" x="255" y="105" width="70" height="36" rx="4"/><text class="sm" x="290" y="127" text-anchor="middle">koil</text>'+
+'<path class="wl" d="M230 80 H290 V105"/><path class="wl" d="M230 160 H290 V141"/>'+
+'<circle class="tm" cx="230" cy="80" r="5"/><circle class="tm" cx="230" cy="160" r="5"/><text class="sm" x="240" y="94">A1</text><text class="sm" x="240" y="154">A2</text>'+
+'<circle class="tm" cx="360" cy="80" r="5"/><circle class="tm" cx="360" cy="130" r="5"/><text class="sm" x="346" y="84" text-anchor="end">13</text><text class="sm" x="346" y="134" text-anchor="end">14</text>'+
+'<rect class="bx" x="470" y="60" width="150" height="130"/><text x="545" y="86" text-anchor="middle">SOLENOID</text><text class="sm" x="545" y="102" text-anchor="middle">24 V DC</text>'+
+'<circle class="tm" cx="470" cy="130" r="5"/><circle class="tm" cx="470" cy="170" r="5"/><text class="sm" x="482" y="134">+</text><text class="sm" x="482" y="174">−</text>'+
+'<path class="wl" d="M136 80 H230"/><path class="wl" d="M136 160 H230"/><path class="wl wr" d="M360 80 H400 V30 H560"/><path class="wl" d="M360 130 H470"/><path class="wl wbk" d="M470 170 H440 V212 H150 V160"/>'+
+'<text class="sm" x="480" y="22">+24 V DC dari PSU</text><text class="sm" x="295" y="206" text-anchor="middle">rel 0 V</text>'+
+'<text class="sm" x="320" y="234" text-anchor="middle">Pasang dioda flyback paralel di koil untuk meredam lonjakan saat dimatikan.</text></svg>';
+
+const SV_RS=(function(){
+ let s='<svg class="sv" viewBox="0 0 660 210" role="img" aria-label="Wiring bus RS-485 dengan terminasi">';
+ s+='<path class="wl wbl" d="M20 110 H630"/><path class="wl wr" d="M20 135 H630"/><path class="sh" d="M20 160 H630"/>';
+ [[10,"MASTER","PLC / IAS"],[250,"SLAVE 1","Purifier"],[490,"SLAVE 2","Generator"]].forEach(function(b){
+  var x=b[0];
+  s+='<rect class="bx" x="'+x+'" y="14" width="130" height="60"/><text x="'+(x+65)+'" y="40" text-anchor="middle">'+b[1]+'</text><text class="sm" x="'+(x+65)+'" y="58" text-anchor="middle">'+b[2]+'</text>';
+  s+='<path class="wl wbl" d="M'+(x+25)+' 74 V110"/><path class="wl wr" d="M'+(x+65)+' 74 V135"/><path class="sh" d="M'+(x+105)+' 74 V160"/>';
+ });
+ s+='<rect class="rs" x="22" y="110" width="10" height="25"/><rect class="rs" x="622" y="110" width="10" height="25"/>';
+ s+='<text class="sm" x="27" y="182" text-anchor="middle">120 Ω</text><text class="sm" x="627" y="182" text-anchor="middle">120 Ω</text>';
+ s+='<text class="sm" x="190" y="105">A (D+)</text><text class="sm" x="190" y="130">B (D−)</text><text class="sm" x="190" y="155">Shield / GND</text>';
+ s+='<text class="sm" x="330" y="204" text-anchor="middle">Topologi daisy-chain. Terminasi hanya di dua ujung bus.</text></svg>';
+ return s;
+})();
+
+const WIRE={
+ loop2:{svg:SV_LOOP,note:"Seri: PSU (+), transmitter, shunt 250 Ω di modul AI, kembali ke PSU (−). Arus sama di seluruh loop. Untuk mengukur mA, lepas satu kabel dan pasang multimeter seri."},
+ rtd3:{svg:SV_RTD,note:"Warna kabel dapat berbeda antar pabrik. Selalu cek diagram terminal pada manual sensor dan modul."},
+ prox3:{svg:SV_PROX,note:"Sensor NPN memerlukan modul DI sinking. Salah tipe membuat sinyal tidak terbaca."},
+ dout:{svg:SV_DOUT,note:"Output PLC memerintah koil relay. Kontak relay menyalurkan 24 V ke solenoid. Ini melindungi output PLC dari beban dan lonjakan koil."},
+ rs485:{svg:SV_RS,note:"Ukur resistansi antar A dan B saat bus mati: sekitar 60 Ω bila dua terminator 120 Ω terpasang benar."}
+};
+
+/* ============ MODAL ============ */
+let cur=null,stack=[];
+function openView(fn,arg,tab){
+ if(cur&&!$("#modal").hidden)stack.push(cur);
+ cur={fn:fn,arg:arg,tab:tab};
+ paint();
+ $("#modal").hidden=false;
+ document.body.classList.add("lock");
+}
+function paint(){
+ const v=cur.fn(cur.arg,cur.tab);
+ $("#mbadge").innerHTML=v.badge;
+ $("#mtitle").textContent=v.title;
+ $("#mquick").innerHTML=v.quick||"";
+ $("#mtabs").innerHTML=(v.tabs||[]).map(t=>'<button class="tab '+(t[0]===v.tab?"on":"")+'" data-tab="'+t[0]+'">'+t[1]+'</button>').join("");
+ $("#mtabs").style.display=(v.tabs&&v.tabs.length)?"flex":"none";
+ $("#mbody").innerHTML=v.body;
+ $("#mbody").scrollTop=0;
+ $("#mbackbtn").hidden=!stack.length;
+}
+function closeModal(){
+ stack=[];cur=null;
+ $("#modal").hidden=true;
+ document.body.classList.remove("lock");
+}
+function backModal(){
+ if(stack.length){cur=stack.pop();paint();}
+}
+
+/* ============ VIEW KOMPONEN ============ */
+const TABS=[["fungsi","Fungsi"],["cara","Cara kerja"],["wiring","Wiring"],["tipe","Tipe & merk"],["spek","Besaran"],["ts","Troubleshooting"],["foto","Foto & Google"]];
+function tile(ic,t,sub,url){return '<a class="tile" href="'+url+'" target="_blank" rel="noopener noreferrer"><span style="font-size:22px">'+ic+'</span><span>'+t+'<small>'+sub+'</small></span></a>';}
+function kompView(id,tab){
+ const k=KM[id];tab=tab||"fungsi";
+ let b="";
+ if(tab==="fungsi"){
+  b='<h4>Fungsi</h4><p>'+k.f+'</p>'+(k.cat?'<div class="note warn"><b>Catatan penting.</b> '+k.cat+'</div>':"")+'<h4>Lokasi di kapal</h4><p>'+k.lok+'</p><h4>Alur sinyal</h4>'+flow(k.al);
+ }else if(tab==="cara"){
+  b='<h4>Cara kerja</h4><p>'+k.k+'</p><h4>Alur sinyal</h4>'+flow(k.al)+'<div class="chips2">'+ext(GV(k.en+" working principle"),"🎬 Video cara kerja")+ext(G(k.en+" how it works"),"🔎 Penjelasan di Google")+ext(GI(k.en+" cutaway diagram"),"🖼️ Gambar potongan")+'</div>';
+ }else if(tab==="wiring"){
+  b='<h4>Wiring dan alur sinyal</h4>'+flow(k.al);
+  if(k.w&&WIRE[k.w])b+=WIRE[k.w].svg+'<div class="note">'+WIRE[k.w].note+'</div>';
+  b+='<div class="note">Prinsip umum: kabel sinyal berselubung twisted-pair, dipisah dari kabel tenaga, shield di-ground satu titik di sisi panel, dan setiap kabel diberi label serta nomor terminal.</div>';
+  b+='<div class="chips2">'+ext(GI(k.en+" wiring diagram"),"🔌 Wiring diagram di Google","pri")+ext(GI(k.en+" terminal connection schematic"),"📐 Skema terminal")+ext(G(k.en+" wiring installation manual pdf"),"📄 Manual instalasi")+'</div>';
+ }else if(tab==="tipe"){
+  b='<h4>Tipe dan jenis</h4><div class="chips2">'+k.tp.map(t=>'<a class="chip" href="'+GI(k.en+" "+t)+'" target="_blank" rel="noopener noreferrer">'+t+' ↗</a>').join("")+'</div>';
+  b+='<h4>Merk yang umum dipakai di kapal</h4><div class="chips2">'+k.mk.map(m=>'<span class="brandchip"><a href="'+GI(m+" "+k.en)+'" target="_blank" rel="noopener noreferrer">'+m+'</a><a href="'+G(m+" "+k.en+" datasheet")+'" target="_blank" rel="noopener noreferrer" title="Datasheet di Google">📄</a></span>').join("")+'</div>';
+  b+='<p class="lead" style="font-size:13.5px">Nama merk hanya contoh untuk belajar. Pilih dan ganti komponen sesuai manual dan approval kelas kapal.</p>';
+ }else if(tab==="spek"){
+  b='<h4>Besaran dan spesifikasi</h4><table class="tbl">'+k.bs.map(r=>'<tr><th>'+r[0]+'</th><td>'+r[1]+' <a href="'+G(k.en+" "+r[0])+'" target="_blank" rel="noopener noreferrer" title="Cari di Google">🔎</a></td></tr>').join("")+'</table><div class="chips2">'+ext(G(k.en+" specification datasheet pdf"),"📄 Datasheet PDF")+ext(G(k.en+" rated range accuracy"),"🔎 Rentang dan akurasi")+'</div>';
+ }else if(tab==="ts"){
+  b='<h4>Langkah troubleshooting</h4><ol>'+k.ts.map(s=>'<li>'+s+'</li>').join("")+'</ol>';
+  b+='<div class="note warn">Keselamatan: lakukan lock-out/tag-out, gunakan APD, dan ikuti manual pabrik serta izin kerja sebelum menyentuh peralatan.</div><div class="chips2">';
+  if(k.tr)b+='<button class="gbtn pri" data-act="tree:'+k.tr+'">🧭 Buka wizard interaktif</button>';
+  b+=ext(G(k.en+" troubleshooting"),"🛠️ Troubleshooting di Google")+ext(GV(k.en+" troubleshooting repair"),"🎬 Video perbaikan")+ext(G(k.en+" common faults causes"),"❓ Gangguan umum")+'</div>';
+ }else{
+  b='<h4>Foto, diagram, dan referensi</h4><div class="tiles">'+
+   tile("📷","Foto komponen","Google Images",GI(k.en))+
+   tile("🚢","Foto pemasangan di kapal","Google Images",GI(k.en+" installation on ship engine room"))+
+   tile("🔌","Wiring diagram","Google Images",GI(k.en+" wiring diagram"))+
+   tile("📐","Skema / schematic","Google Images",GI(k.en+" schematic diagram"))+
+   tile("🎬","Video cara kerja","Google Video",GV(k.en+" working principle"))+
+   tile("📄","Datasheet PDF","Google",G(k.en+" datasheet filetype:pdf"))+
+   tile("📘","Manual dan panduan","Google",G(k.en+" manual marine pdf"))+
+   tile("🛠️","Troubleshooting","Google",G(k.en+" troubleshooting"))+
+   tile("⚖️","Kalibrasi dan pengujian","Google",G(k.en+" calibration testing procedure"))+
+   '</div><p class="lead" style="font-size:13.5px">Foto tidak disematkan langsung di aplikasi supaya cepat dan menghormati hak cipta. Tombol di atas membuka hasil Google pada tab baru.</p>';
+ }
+ return{badge:CAT[k.c][1]+" "+CAT[k.c][0],title:k.n,tab:tab,tabs:TABS,
+  quick:ext(GI(k.en),"📷 Foto","pri")+ext(GI(k.en+" wiring diagram"),"🔌 Wiring")+ext(G(k.en+" datasheet filetype:pdf"),"📄 Datasheet")+ext(GV(k.en+" working principle"),"🎬 Video"),
+  body:b};
+}
+
+/* ============ VIEW INFO (modul, level, teknologi) ============ */
+function chipsKomp(ids){return '<div class="chips2">'+ids.map(id=>'<button class="chip" data-act="komp:'+id+'">'+KM[id].i+" "+KM[id].n+'</button>').join("")+'</div>';}
+function infoView(o){
+ let b="<p>"+o.ringkas+"</p>";
+ if(o.contoh)b+='<div class="note"><b>Contoh di kapal.</b> '+o.contoh+'</div>';
+ if(o.topik)b+='<h4>Topik yang dipelajari</h4><ul>'+o.topik.map(t=>'<li><a href="'+G(t+" marine shipboard")+'" target="_blank" rel="noopener noreferrer">'+t+' ↗</a></li>').join("")+'</ul>';
+ if(o.extra)b+=o.extra;
+ b+='<h4>Komponen terkait</h4>'+chipsKomp(o.komp);
+ b+='<h4>Belajar lebih jauh di Google</h4><div class="tiles">'+tile("🖼️","Foto dan gambar","Google Images",GI(o.g))+tile("🔎","Penjelasan dan tutorial","Google",G(o.g+" tutorial"))+tile("🎬","Video","Google Video",GV(o.g))+tile("📝","Soal latihan","Google",G(o.g+" soal latihan"))+'</div>';
+ if(o.go)b+='<div class="chips2"><button class="gbtn pri" data-act="go:#'+o.go+'">🧭 Buka wizard troubleshooting</button></div>';
+ return{badge:o.badgeTxt,title:o.t,tab:"",tabs:[],quick:ext(GI(o.g),"📷 Foto","pri")+ext(G(o.g+" tutorial"),"🔎 Tutorial")+ext(GV(o.g),"🎬 Video"),body:b};
+}
+const MODV=id=>{const m=MOD.find(x=>x.id===id);return infoView(Object.assign({badgeTxt:(m.exam?"📝 ":"📘 ")+"Modul "+m.id+" · "+m.bab},m));};
+const LVLV=i=>{const l=LVL[i];return infoView(Object.assign({badgeTxt:"🔺 Piramida otomasi"},l));};
+const TECHV=i=>{const t=TECH[i];return infoView(Object.assign({badgeTxt:"🧭 "+t.badge},t));};
+
+/* ============ AKSI ============ */
+function go(h){const el=document.querySelector(h);if(el)el.scrollIntoView({behavior:"smooth",block:"start"});}
+function act(a){
+ const i=a.indexOf(":"),t=a.slice(0,i),v=a.slice(i+1);
+ closeMenus();
+ if(t==="modul")openView(MODV,v);
+ else if(t==="komp")openView(kompView,v,"fungsi");
+ else if(t==="lvl")openView(LVLV,+v);
+ else if(t==="tech")openView(TECHV,+v);
+ else if(t==="cat"){closeModal();setCat(v);go("#katalog");}
+ else if(t==="go"){closeModal();go(v);}
+ else if(t==="tree"){closeModal();wz.tree=v;wz.node=null;wz.path=[];wz.hist=[];wzRender();go("#trouble");}
+}
+
+/* ============ MENU ============ */
+const POP=["pt100","ptx","plc","radar","epirb","omd"];
+const MENU=[
+ {t:"Kurikulum",wide:true,items:[{h:"16 modul pembelajaran"}].concat(MOD.map(m=>({l:m.id+" · "+m.t,s:m.bab,a:"modul:"+m.id,i:m.exam?"📝":"📘"})))},
+ {t:"Komponen",wide:true,items:[{h:"Kategori"}].concat(Object.keys(CAT).map(k=>({l:CAT[k][0],s:KOMP.filter(x=>x.c===k).length+" komponen",a:"cat:"+k,i:CAT[k][1]})),[{h:"Populer"}],POP.map(id=>({l:KM[id].n,s:CAT[KM[id].c][0],a:"komp:"+id,i:KM[id].i})))},
+ {t:"Piramida",items:LVL.map((l,i)=>({l:l.t,s:l.sub,a:"lvl:"+i,i:"🔺"})).concat(TECH.map((t,i)=>({l:t.t,s:t.sub,a:"tech:"+i,i:"🧭"})))},
+ {t:"Alat belajar",items:[{l:"Simulator 4–20 mA",s:"Injeksi gangguan loop",a:"go:#simulator",i:"🎛️"},{l:"Studi kasus: alarm LO PRESS LOW",s:"Dari sensor sampai layar, 8 langkah",a:"go:#studikasus",i:"🧭"},{l:"Kalkulator",s:"PT100, ADC, suplai loop",a:"go:#kalkulator",i:"🧮"},{l:"Wizard troubleshooting",s:"Cari penyebab gangguan",a:"go:#trouble",i:"🛠️"},{l:"Kamus istilah",s:"Glosarium",a:"go:#kamus",i:"📖"},{l:"Rumus",s:"Kamus rumus ESS",a:"go:#rumus",i:"➗"},{l:"Kuis kilat",s:"8 soal",a:"go:#kuis",i:"✅"}]},
+ {t:"Google cepat",items:[
+  {l:"Foto komponen elektronika kapal",u:GI("shipboard electronic components marine"),i:"📷"},
+  {l:"Wiring diagram panel kapal",u:GI("marine control panel wiring diagram PLC"),i:"🔌"},
+  {l:"Datasheet transmitter 4–20 mA",u:G("pressure transmitter 4-20mA datasheet filetype:pdf"),i:"📄"},
+  {l:"Video PLC dan IAS kapal",u:GV("marine PLC IAS engine control room"),i:"🎬"},
+  {l:"Troubleshooting sistem otomasi kapal",u:G("marine automation system troubleshooting"),i:"🛠️"},
+  {l:"UMS dan notasi kelas E0",u:G("unattended machinery space UMS class notation requirements"),i:"📜"},
+  {l:"Standar ETO dan STCW",u:G("electro-technical officer STCW competence"),i:"🎓"}]}
+];
+function buildMenu(){
+ $("#menu").innerHTML=MENU.map(function(m){
+  const items=m.items.map(function(it){
+   if(it.h)return '<div class="h">'+it.h+'</div>';
+   const inner='<span class="ic">'+it.i+'</span><span>'+it.l+(it.s?'<small>'+it.s+'</small>':"")+'</span>';
+   if(it.u)return '<a href="'+it.u+'" target="_blank" rel="noopener noreferrer">'+inner+' ↗</a>';
+   return '<a href="#" data-act="'+it.a+'">'+inner+'</a>';
+  }).join("");
+  return '<div class="mi"><button type="button" data-toggle aria-haspopup="true">'+m.t+'</button><div class="dd'+(m.wide?" wide":"")+'">'+items+'</div></div>';
+ }).join("");
+}
+function closeMenus(){
+ document.querySelectorAll(".mi.open").forEach(x=>x.classList.remove("open"));
+ $("#menu").classList.remove("open");
+ $("#burger").setAttribute("aria-expanded","false");
+}
+
+/* ============ KATALOG ============ */
+const kat={cat:"all",q:""};
+function setCat(c){kat.cat=c;renderKat();}
+function renderKat(){
+ const chips=[["all","Semua ("+KOMP.length+")"]].concat(Object.keys(CAT).map(k=>[k,CAT[k][1]+" "+CAT[k][0]]));
+ $("#kchips").innerHTML=chips.map(c=>'<button class="chip '+(kat.cat===c[0]?"on":"")+'" data-cat="'+c[0]+'">'+c[1]+'</button>').join("");
+ const q=kat.q.trim().toLowerCase();
+ const list=KOMP.filter(k=>(kat.cat==="all"||k.c===kat.cat)&&(!q||(k.n+" "+k.f+" "+k.en+" "+k.mk.join(" ")+" "+CAT[k.c][0]).toLowerCase().indexOf(q)>=0));
+ $("#kgrid").innerHTML=list.length?list.map(k=>'<article class="kcard"><button class="kmain" data-act="komp:'+k.id+'"><span class="ki">'+k.i+'</span><b>'+k.n+'</b><span class="kc">'+CAT[k.c][0]+'</span><p>'+k.f+'</p></button><div class="kfoot"><a href="'+GI(k.en)+'" target="_blank" rel="noopener noreferrer">📷 Foto</a><a href="'+GI(k.en+" wiring diagram")+'" target="_blank" rel="noopener noreferrer">🔌 Wiring</a><a href="'+G(k.en+" datasheet filetype:pdf")+'" target="_blank" rel="noopener noreferrer">📄 Datasheet</a></div></article>').join(""):'<div class="empty">Tidak ada komponen yang cocok. Coba kata lain atau cari langsung di Google.</div>';
+ $("#kcount").textContent=list.length+" dari "+KOMP.length+" komponen ditampilkan.";
+ $("#kG").href=q?GI(q+" marine component"):GI("shipboard electronic components marine");
+}
+
+/* ============ SIMULATOR ============ */
+let jit=null;
+function simUpdate(){
+ const rng=+$("#sRange").value,pct=+$("#sP").value,f=$("#sFault").value;
+ const P=rng*pct/100,base=4+16*pct/100;
+ $("#sPv").textContent=P.toFixed(rng<=16?1:0)+" bar";
+ let I=base,V,txt,bad=false;
+ if(f==="ok"){txt="Loop normal. Tegangan di transmitter sekitar 18–24 V dan arus mengikuti tekanan.";}
+ else if(f==="open_p"){I=0;V=0;bad=true;txt="Kabel sisi (+) putus. Tegangan di transmitter 0 V dan arus 0 mA. Cek fuse, PSU, dan kabel dari PSU ke transmitter.";}
+ else if(f==="open_r"){I=0;V=24;bad=true;txt="Kabel return putus. Arus 0 mA tetapi tegangan di transmitter mendekati 24 V karena loop terbuka. Cek kabel ke modul AI.";}
+ else if(f==="psu"){I=0;V=0;bad=true;txt="Suplai 24 V mati atau fuse putus. Ukur keluaran PSU dan MCB loop.";}
+ else if(f==="short"){I=88.9;V=0;bad=true;txt="Loop korslet: arus melonjak, tegangan di transmitter mendekati 0 V, fuse dapat putus. Periksa isolasi kabel dan terminal.";}
+ else if(f==="low"){I=3.6;bad=true;txt="Transmitter rusak dan gagal ke bawah (sekitar 3,6 mA). PLC membaca di bawah 3,8 mA sebagai sensor fault (NAMUR NE43).";}
+ else if(f==="high"){I=21;bad=true;txt="Transmitter rusak dan gagal ke atas (sekitar 21 mA). PLC membaca di atas 20,5 mA sebagai sensor fault.";}
+ else if(f==="drift"){I=Math.min(20.4,base+1.28);txt="Drift kalibrasi +8 % span. Arus tampak normal tetapi angka salah. Bandingkan dengan manometer lokal dan kalibrasi ulang.";}
+ else if(f==="noise"){I=Math.max(0,base+(Math.random()-.5)*1.2);txt="Ground loop atau noise: arus bergoyang. Periksa shield hanya satu titik di panel dan pisahkan dari kabel tenaga.";}
+ if(V===undefined)V=Math.max(0,24-I*0.27);
+ const Vs=I/1000*250;
+ let disp,ias=false;
+ if(I<3.8){disp="SENSOR FAULT";ias=true;}
+ else if(I>20.5){disp="SENSOR FAULT";ias=true;}
+ else{const Pd=rng*(I-4)/16;disp=Pd.toFixed(rng<=16?1:0)+" bar";if(Pd<0.15*rng){disp+=" (LOW ALARM)";ias=true;}}
+ $("#rI").textContent=I.toFixed(2)+" mA";
+ $("#rV").textContent=V.toFixed(1)+" V";
+ $("#rS").textContent=Vs.toFixed(2)+" V";
+ $("#rD").textContent=disp;$("#rD").style.fontSize=disp.length>12?"15px":"";
+ $("#roI").className="ro "+(ias?"bad":"ok");
+ $("#gI").style.left="calc("+Math.min(100,I/24*100)+"% - 2px)";
+ const d=$("#diag");d.className="diag "+((bad||ias)?"bad":"ok");d.innerHTML="<b>"+(bad?"Diagnosa:":"Status:")+"</b> "+txt;
+ const box=$("#simsvg");box.classList.toggle("off",I<0.5);box.style.setProperty("--spd",Math.max(.4,2.4-I/10)+"s");
+ if(jit){clearInterval(jit);jit=null;}
+ if(f==="noise")jit=setInterval(simUpdate,700);
+}
+function initSim(){
+ $("#simsvg").innerHTML=SV_LOOP;
+ ["#sRange","#sP","#sFault"].forEach(s=>$(s).addEventListener("input",simUpdate));
+ $("#simLinks").innerHTML='<button class="gbtn pri" data-act="tree:loop">🧭 Wizard troubleshooting</button>'+ext(G("4-20mA loop troubleshooting"),"🛠️ Google")+ext(GI("4-20mA transmitter loop wiring diagram"),"🔌 Wiring")+ext(GV("4-20mA loop working principle"),"🎬 Video");
+ simUpdate();
+}
+
+/* ============ KALKULATOR ============ */
+const CA=0.0039083,CB=-5.775e-7,CC=-4.183e-12;
+function rt(t){return t<0?100*(1+CA*t+CB*t*t+CC*(t-100)*t*t*t):100*(1+CA*t+CB*t*t);}
+function tr_(r){let t=(r/100-1)/CA;for(let i=0;i<12;i++){const d=(rt(t+0.01)-rt(t))/0.01;t-=(rt(t)-r)/d;}return t;}
+const calcTabs=[["pt","PT100"],["adc","Resolusi ADC"],["loop","Suplai loop"]];
+let ctab="pt";
+function calcRender(){
+ $("#ctabs").innerHTML=calcTabs.map(c=>'<button class="tab '+(c[0]===ctab?"on":"")+'" data-ctab="'+c[0]+'">'+c[1]+'</button>').join("");
+ let h="";
+ if(ctab==="pt"){
+  h='<p class="lead">Ubah suhu untuk melihat resistansi, atau masukkan resistansi hasil ukur multimeter untuk mengetahui suhunya.</p><div class="calc"><div><label for="ptT">Suhu (°C)</label><input id="ptT" type="number" step="any" value="25"></div><div><label for="ptR">Resistansi (Ω)</label><input id="ptR" type="number" step="any" value="109.73"></div></div><div class="out" id="ptO"></div><div class="chips2" style="margin-top:12px">'+ext(GI("PT100 resistance temperature table"),"🖼️ Tabel PT100")+ext(G("PT100 3 wire measurement multimeter"),"🔎 Cara ukur")+'</div>';
+ }else if(ctab==="adc"){
+  h='<p class="lead">Hitung ketelitian modul analog input dan nilai digital untuk arus tertentu.</p><div class="calc"><div><label for="aB">Resolusi ADC</label><select id="aB"><option>10</option><option selected>12</option><option>14</option><option>16</option></select></div><div><label for="aR">Rentang sensor (bar)</label><input id="aR" type="number" step="any" value="100"></div><div><label for="aI">Arus (mA)</label><input id="aI" type="number" step="any" value="12"></div></div><div class="out" id="aO"></div><div class="chips2" style="margin-top:12px">'+ext(G("ADC resolution bits analog input module PLC"),"🔎 Penjelasan")+'</div>';
+ }else{
+  h='<p class="lead">Cek apakah tegangan suplai cukup untuk transmitter pada arus maksimum 22 mA (kondisi alarm).</p><div class="calc"><div><label for="lS">Suplai (V DC)</label><input id="lS" type="number" step="any" value="24"></div><div><label for="lM">Tegangan minimum transmitter (V)</label><input id="lM" type="number" step="any" value="10.5"></div><div><label for="lL">Beban seri: shunt dan lain-lain (Ω)</label><input id="lL" type="number" step="any" value="250"></div><div><label for="lC">Tahanan kabel loop (Ω)</label><input id="lC" type="number" step="any" value="20"></div></div><div class="out" id="lO"></div><div class="chips2" style="margin-top:12px">'+ext(G("4-20mA loop power supply compliance voltage calculation"),"🔎 Penjelasan")+'</div>';
+ }
+ $("#cbody").innerHTML=h;calcCompute();
+}
+function num(id){return parseFloat($(id).value);}
+function calcCompute(){
+ if(ctab==="pt"&&$("#ptO")){
+  const t=num("#ptT");
+  $("#ptO").innerHTML="R("+t+" °C) = <b>"+rt(t).toFixed(2)+" Ω</b><br>Toleransi Kelas A: ± "+(0.15+0.002*Math.abs(t)).toFixed(2)+" °C<br>Toleransi Kelas B: ± "+(0.30+0.005*Math.abs(t)).toFixed(2)+" °C<br>Ingat: 0 Ω = korsleting, OL = putus.";
+ }else if(ctab==="adc"&&$("#aO")){
+  const n=Math.pow(2,num("#aB")),r=num("#aR"),i=num("#aI");
+  const frac=(i-4)/16,cnt=Math.round(frac*(n-1));
+  $("#aO").innerHTML="Langkah = <b>"+n.toLocaleString("id-ID")+"</b><br>Presisi = "+r+" / "+n+" = <b>"+(r/n).toPrecision(3)+" bar</b> per langkah<br>Nilai digital pada "+i+" mA = <b>"+cnt+"</b> (dari "+(n-1)+")<br>Tekanan = <b>"+(r*frac).toFixed(2)+" bar</b><br>Skala Siemens (0–27.648) = "+Math.round(frac*27648);
+ }else if(ctab==="loop"&&$("#lO")){
+  const Vs=num("#lS"),Vm=num("#lM"),Rl=num("#lL"),Rc=num("#lC");
+  const avail=Vs-0.022*(Rl+Rc),ok=avail>=Vm;
+  $("#lO").innerHTML="Tegangan tersedia di transmitter = "+Vs+" − 0,022 × ("+Rl+" + "+Rc+") = <b>"+avail.toFixed(2)+" V</b><br>Minimum transmitter = "+Vm+" V<br>Hasil: <b style='color:"+(ok?"var(--ok)":"var(--bad)")+"'>"+(ok?"CUKUP (margin "+(avail-Vm).toFixed(2)+" V)":"KURANG. Kurangi beban atau naikkan suplai.")+"</b>";
+ }
+}
+
+/* ============ WIZARD ============ */
+const wz={tree:"loop",node:null,path:[],hist:[]};
+function wzRender(){
+ $("#wtabs").innerHTML=Object.keys(TREES).map(k=>'<button class="tab '+(k===wz.tree?"on":"")+'" data-tree="'+k+'">'+TREES[k].t+'</button>').join("");
+ const T=TREES[wz.tree],n=T.n[wz.node||T.start];
+ let h="";
+ if(wz.path.length)h+='<div class="trail">'+wz.path.map(p=>'<span>'+p+'</span>').join("")+'</div>';
+ if(n.q){
+  h+='<div class="q">'+n.q+'</div><div class="opts">'+n.o.map((o,i)=>'<button class="opt" data-o="'+i+'">'+o[0]+'</button>').join("")+'</div>';
+ }else{
+  const r=n.r;
+  h+='<div class="res"><div class="badge">Kemungkinan penyebab</div><div class="q">'+r.t+'</div><p>Langkah tindak lanjut:</p><ol>'+r.s.map(s=>'<li>'+s+'</li>').join("")+'</ol><div class="chips2">'+ext(G(r.g),"🔎 Panduan di Google","pri")+ext(GV(r.g),"🎬 Video")+ext(GI(r.g),"🖼️ Gambar")+'</div></div>';
+ }
+ h+='<div class="chips2" style="margin-top:18px"><button class="gbtn" data-wz="back">← Langkah sebelumnya</button><button class="gbtn" data-wz="reset">↺ Mulai ulang</button></div>';
+ $("#wz").innerHTML=h;
+}
+function wzChoose(i){
+ const T=TREES[wz.tree],key=wz.node||T.start,n=T.n[key],o=n.o[i];
+ wz.hist.push(key);wz.path.push(o[0]);wz.node=o[1];wzRender();
+}
+
+/* ============ KAMUS, RUMUS, KUIS ============ */
+function renderTerms(){
+ const q=$("#tq").value.trim().toLowerCase();
+ const l=TERM.filter(t=>!q||(t[0]+" "+t[1]).toLowerCase().indexOf(q)>=0);
+ $("#tgrid").innerHTML=l.length?l.map(t=>'<div class="term"><b>'+t[0]+'</b><p>'+t[1]+'</p><div>'+ext(G(t[0]+" adalah marine"),"🔎 Google")+ext(GI(t[0]+" marine diagram"),"🖼️ Gambar")+'</div></div>').join(""):'<div class="empty">Istilah tidak ditemukan. Coba cari di Google.</div>';
+}
+function renderForms(){
+ $("#fgrid").innerHTML=FORM.map(f=>'<div class="card fcard"><b>'+f.t+'</b><div class="fbox">'+f.f+'</div><div class="chips2">'+ext(G(f.g),"🔎 Penjelasan")+ext(GI(f.g),"🖼️ Gambar")+'</div></div>').join("");
+}
+const qz={i:0,s:0};
+function quizRender(){
+ const el=$("#quiz");
+ if(qz.i>=QUIZ.length){
+  el.innerHTML='<div class="q">Skor akhir: '+qz.s+' dari '+QUIZ.length+'</div><p>'+(qz.s>=6?"Kerja bagus. Lanjutkan ke simulator dan wizard troubleshooting.":"Ulangi materi modul terkait, lalu coba lagi.")+'</p><div class="chips2" style="margin-top:12px"><button class="gbtn pri" data-qz="reset">↺ Ulangi kuis</button>'+ext(G("latihan soal sistem elektronika kapal PLC 4-20mA"),"🔎 Soal lain di Google")+'</div>';
+  return;
+ }
+ const q=QUIZ[qz.i];
+ el.innerHTML='<div class="badge">Soal '+(qz.i+1)+' dari '+QUIZ.length+'</div><div class="q">'+q.q+'</div><div class="opts">'+q.o.map((o,i)=>'<button class="opt" data-qa="'+i+'">'+o+'</button>').join("")+'</div><div id="qe"></div>';
+}
+function quizAnswer(i){
+ const q=QUIZ[qz.i],btns=document.querySelectorAll("#quiz .opt");
+ if(document.querySelector("#quiz .opt.right,#quiz .opt.wrong"))return;
+ btns.forEach((b,j)=>{if(j===q.a)b.classList.add("right");else if(j===i)b.classList.add("wrong");});
+ if(i===q.a)qz.s++;
+ $("#qe").innerHTML='<div class="note"><b>'+(i===q.a?"Benar. ":"Belum tepat. ")+'</b>'+q.e+'</div><div class="chips2"><button class="gbtn pri" data-qz="next">'+(qz.i+1>=QUIZ.length?"Lihat skor":"Soal berikutnya")+'</button></div>';
+}
+
+/* ============ PIRAMIDA, TEKNOLOGI, MODUL ============ */
+function renderStatic(){
+ $("#pyr").innerHTML=LVL.map((l,i)=>'<button class="lv" style="--w:'+l.w+';background:'+l.col+'" data-act="lvl:'+i+'"><b>'+l.t+'</b><small>'+l.sub+'</small></button>').join("");
+ $("#tech").innerHTML=TECH.map((t,i)=>'<button class="tstep" data-act="tech:'+i+'"><b>'+t.t+'</b><small>'+t.sub+'</small></button>').join("");
+ $("#modGrid").innerHTML=MOD.map(m=>'<button class="mcard'+(m.exam?" exam":"")+'" data-act="modul:'+m.id+'"><span class="mid">'+m.id+" · "+m.bab+'</span><b>'+m.t+'</b><span class="b">'+m.komp.length+' komponen terkait</span></button>').join("");
+ $("#sMod").textContent=MOD.length;$("#sKom").textContent=KOMP.length;
+ $("#fLinks").innerHTML+=[["Foto komponen kapal",GI("shipboard electronic components marine")],["Wiring diagram kapal",GI("marine PLC panel wiring diagram")],["Datasheet transmitter",G("pressure transmitter 4-20mA datasheet filetype:pdf")],["Video sistem otomasi kapal",GV("marine automation system engine room")]].map(l=>'<a href="'+l[1]+'" target="_blank" rel="noopener noreferrer">'+l[0]+' ↗</a>').join("");
+}
+
+/* ============ INIT & EVENT ============ */
+function init(){
+ buildMenu();renderStatic();renderKat();initSim();renderCase();calcRender();wzRender();renderTerms();renderForms();quizRender();
+ $("#heroG").href=G("shipboard electronic system kapal");
+ $("#hq").addEventListener("input",function(){$("#heroG").href=G((this.value||"shipboard electronic system")+" kapal");});
+ $("#hform").addEventListener("submit",function(e){e.preventDefault();$("#kq").value=$("#hq").value;kat.q=$("#hq").value;kat.cat="all";renderKat();go("#katalog");});
+ $("#kq").addEventListener("input",function(){kat.q=this.value;renderKat();});
+ $("#tq").addEventListener("input",renderTerms);
+ $("#cbody").addEventListener("input",calcCompute);
+ $("#burger").addEventListener("click",function(){const m=$("#menu");const o=m.classList.toggle("open");this.setAttribute("aria-expanded",o?"true":"false");});
+ $("#theme").addEventListener("click",function(){
+  const r=document.documentElement,dark=r.getAttribute("data-theme")==="dark"||(!r.getAttribute("data-theme")&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+  r.setAttribute("data-theme",dark?"light":"dark");
+ });
+ $("#mbackbtn").addEventListener("click",backModal);
+ document.addEventListener("keydown",function(e){if(e.key==="Escape"){if(!$("#modal").hidden)closeModal();else closeMenus();}});
+ document.addEventListener("click",function(e){
+  const t=e.target;
+  if(t.closest("[data-close]")){closeModal();return;}
+  const tg=t.closest("[data-toggle]");
+  if(tg){const mi=tg.parentElement,was=mi.classList.contains("open");document.querySelectorAll(".mi.open").forEach(x=>x.classList.remove("open"));if(!was)mi.classList.add("open");return;}
+  const tab=t.closest("#mtabs .tab[data-tab]");
+  if(tab&&cur){cur.tab=tab.dataset.tab;paint();return;}
+  const a=t.closest("[data-act]");
+  if(a){e.preventDefault();act(a.dataset.act);return;}
+  const ct=t.closest("[data-cat]");
+  if(ct){setCat(ct.dataset.cat);return;}
+  const ctb=t.closest("[data-ctab]");
+  if(ctb){ctab=ctb.dataset.ctab;calcRender();return;}
+  const wt=t.closest("[data-tree]");
+  if(wt){wz.tree=wt.dataset.tree;wz.node=null;wz.path=[];wz.hist=[];wzRender();return;}
+  const wo=t.closest("#wz .opt[data-o]");
+  if(wo){wzChoose(+wo.dataset.o);return;}
+  const ww=t.closest("[data-wz]");
+  if(ww){
+   if(ww.dataset.wz==="reset"){wz.node=null;wz.path=[];wz.hist=[];}
+   else if(wz.hist.length){wz.node=wz.hist.pop();if(wz.node===TREES[wz.tree].start)wz.node=null;wz.path.pop();}
+   wzRender();return;
+  }
+  const qa=t.closest("[data-qa]");
+  if(qa){quizAnswer(+qa.dataset.qa);return;}
+  const qn=t.closest("[data-qz]");
+  if(qn){if(qn.dataset.qz==="reset"){qz.i=0;qz.s=0;}else qz.i++;quizRender();return;}
+  if(!t.closest(".mi")&&!t.closest("#burger"))closeMenus();
+ });
+}
+init();
+</script></body></html>
